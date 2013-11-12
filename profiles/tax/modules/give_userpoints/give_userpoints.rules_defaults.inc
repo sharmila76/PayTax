@@ -39,7 +39,7 @@ function give_userpoints_default_rules_configuration() {
       "OWNER" : "rules",
       "TAGS" : [ "deduct points" ],
       "REQUIRES" : [ "rules", "userpoints_rules" ],
-      "ON" : { "node_insert--ask_question" : { "bundle" : "ask_question" } },
+      "ON" : { "node_insert--question" : { "bundle" : "question" } },
       "IF" : [
         { "user_has_role" : { "account" : [ "node:author" ], "roles" : { "value" : { "4" : "4" } } } }
       ],

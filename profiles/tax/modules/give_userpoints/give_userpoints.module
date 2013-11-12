@@ -1,7 +1,5 @@
 <?php
 /**
  * @file
- * Code for the Give Userpoints feature.
+ * Drupal needs this blank file.
  */
-
-include_once 'give_userpoints.features.inc';
