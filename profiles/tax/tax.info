@@ -1,0 +1,47 @@
+name = Tax
+description = Tax management system
+version = 1.0
+core = 7.x
+
+; standard modules
+dependencies[] = block
+dependencies[] = color
+dependencies[] = comment
+dependencies[] = contextual
+dependencies[] = dashboard
+dependencies[] = help
+dependencies[] = image
+dependencies[] = list
+dependencies[] = menu
+dependencies[] = number
+dependencies[] = options
+dependencies[] = path
+dependencies[] = taxonomy
+dependencies[] = dblog
+dependencies[] = search
+dependencies[] = shortcut
+dependencies[] = toolbar
+dependencies[] = overlay
+dependencies[] = field_ui
+dependencies[] = file
+dependencies[] = rdf
+
+; contrib modules
+dependencies[] = cck
+dependencies[] = ctools
+dependencies[] = entity
+dependencies[] = features
+dependencies[] = flag
+dependencies[] = pathauto
+dependencies[] = rules
+dependencies[] = token
+dependencies[] = userpoints
+dependencies[] = userpoints_nc
+dependencies[] = userpoints_rules
+dependencies[] = views
+dependencies[] = views_ui
+
+
+; custom modules
+dependencies[] = user_roles
+dependencies[] = give_userpoints

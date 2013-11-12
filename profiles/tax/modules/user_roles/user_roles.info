@@ -1,0 +1,11 @@
+name = User Roles
+description = add user role to the user
+core = 7.x
+package = Features
+version = 7.x-1.0
+project = user_roles
+dependencies[] = features
+features[features_api][] = api:2
+features[user_role][] = consultant
+features[user_role][] = customer
+features[user_role][] = router
