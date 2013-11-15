@@ -40,6 +40,8 @@ dependencies[] = userpoints_nc
 dependencies[] = userpoints_rules
 dependencies[] = views
 dependencies[] = views_ui
+dependencies[] = answers
+
 
 
 ; custom modules
