@@ -27,7 +27,10 @@ dependencies[] = file
 dependencies[] = rdf
 
 ; contrib modules
+dependencies[] = answers
 dependencies[] = cck
+dependencies[] = commerce
+dependencies[] = commerce_ccavenue
 dependencies[] = ctools
 dependencies[] = entity
 dependencies[] = features
@@ -40,9 +43,6 @@ dependencies[] = userpoints_nc
 dependencies[] = userpoints_rules
 dependencies[] = views
 dependencies[] = views_ui
-dependencies[] = answers
-
-
 
 ; custom modules
 dependencies[] = user_roles

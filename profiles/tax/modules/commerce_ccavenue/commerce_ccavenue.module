@@ -1,0 +1,199 @@
+<?php
+/**
+ * @file
+ * Administration forms form payment method
+ */
+function ccavenue_settings_form($settings = NULL) {
+  $form = array();
+  $settings = (array) $settings + array(
+    'merchant_id' => '',
+    'working_key' => '',
+  );
+  $form['merchant_id'] = array(
+    '#type' => 'textfield',
+    '#title' => t('Merchant id'),
+    '#default_value' => $settings['merchant_id'],
+  );
+  $form['working_key'] = array(
+    '#type' => 'textfield',
+    '#title' => t('CCavenue Working key'),
+    '#default_value' => $settings['working_key'],
+  );
+  return $form;
+}
+// register payment method
+function commerce_ccavenue_commerce_payment_method_info() {
+  $payment_methods = array();
+  $payment_methods['ccavenue'] = array(
+    'title' => t("CCavenue"),
+    'display_title' => "CCavenue",
+    'short_title' => 'CCavenue',
+    'description' => t("Payment method for CCavenue"),
+    'terminal' => FALSE,
+    'offsite' => TRUE,
+    'offsite_autoredirect' => TRUE,
+  );
+  return $payment_methods;
+}
+
+// Ask for CCavenue redirect form
+function ccavenue_redirect_form($form, &$form_state, $order, $payment_method) {
+  $wrapper = entity_metadata_wrapper('commerce_order', $order);
+  // Get financial info
+  $currency_code = $wrapper->commerce_order_total->currency_code->value();
+  $amount = $wrapper->commerce_order_total->amount->value()/100;
+  $return_url = url('checkout/' . $order->order_id . '/payment/return/' . $order->data['payment_redirect_key'], array('absolute' => TRUE));
+  $merchant_id = $payment_method['settings']['merchant_id'];
+  $working_key = $payment_method['settings']['working_key'];
+  $order_id = $order->order_id;
+  $checksum = _commerce_ccavenue_getchecksum($merchant_id, $amount, $order_id, $return_url, $working_key);
+  $form['Merchant_Id'] = array(
+    '#type' => 'hidden',
+    '#value' => $merchant_id,
+    );
+  $form['Amount'] = array(
+    '#type' => 'hidden',
+    '#value' => $amount ,
+    );
+  $form['Order_Id'] = array(
+    '#type' => 'hidden',
+    '#value' => $order_id,
+    );
+  $form['Redirect_Url'] = array(
+    '#type' => 'hidden',
+    '#value' => $return_url,
+    );
+  $form['Checksum'] = array(
+    '#type' => 'hidden',
+    '#value' => $checksum,
+    );
+  $form['#action'] = 'https://www.ccavenue.com/shopzone/cc_details.jsp';
+  return $form;
+}
+/**
+ * Implements hook_redirect_form_validate().
+ */
+// validate payment
+function ccavenue_redirect_form_validate($order, $payment_method) {
+  $authdesc = $_REQUEST['AuthDesc'];
+  $checksum = _commerce_ccavenue_verify($payment_method);
+  $message = t('Security error ip Address was: @ip', array('@ip' => ip_address()));
+  if ( $checksum == "true" && $authdesc == "Y" ) {
+    return drupal_set_message(t('Thank you for shopping with us. Your account has been charged and your transaction is successful.'));
+    commerce_ccavenue_transaction($order, $payment_method);
+    //Here you need to put in the routines for a successful 
+    //transaction such as sending an email to customer,
+    //setting database status, informing logistics etc etc
+  } 
+  elseif ( $checksum == "true" && $authdesc == "B" ) {
+    return drupal_set_message(('Thank you for shopping with us.We will keep you posted regarding the status of your order through e-mail'));
+    commerce_ccavenue_transaction($order, $payment_method);
+    //Here you need to put in the routines/e-mail for a  "Batch Processing" order
+    //This is only if payment for this transaction has been made by an American Express Card
+    //since American Express authorisation status is available only after 5-6 hours by mail from ccavenue and at the "View Pending Orders"
+  } 
+  elseif ( $checksum == "true" && $authdesc == "N" ) {
+    return drupal_set_message(t('Thank you for shopping with us.However,the transaction has been declined.'));
+    commerce_ccavenue_transaction($order, $payment_method);
+    //Here you need to put in the routines for a failed
+    //transaction such as sending an email to customer
+    //setting database status etc etc
+  } 
+  else {
+    return drupal_set_message(t('Security Error. Illegal access detected. We will store your IP address.'), ERROR );
+    watchdog('commerce_ccavenue', $message, NULL, WATCHDOG_ERROR);
+    //Here you need to simply ignore this and dont need
+    //to perform any operation in this condition
+  }
+}
+/**
+ * Creates an example payment transaction for the specified charge amount.
+ *
+ * @param $payment_method
+ * The payment method instance object used to charge this payment.
+ * @param $order
+ * The order object the payment applies to.
+ * @param $charge
+ * An array indicating the amount and currency code to charge.
+ * @param $name
+ * The name entered on the submission form.
+ */
+function commerce_ccavenue_transaction($order, $payment_method) {
+// ask results from verify function
+  if(_commerce_ccavenue_verify($payment_method) == 'false') {
+    return;
+  };
+  $wrapper = entity_metadata_wrapper('commerce_order', $order);
+  $currency = $wrapper->commerce_order_total->currency_code->value();
+  $amount = $wrapper->commerce_order_total->amount->value();
+  $transaction->instance_id = $payment_method['instance_id'];
+  $transaction->amount = $amount;
+  $transaction->currency_code = $currency;
+  $transaction->remote_status = t('Success');
+  $transaction->status = COMMERCE_PAYMENT_STATUS_SUCCESS;
+  $transaction->message = t('Payment received at') . ' ' . date("d-m-Y H:i:s", REQUEST_TIME);
+  commerce_payment_transaction_save($transaction);
+}
+
+
+// helper functions.. 
+function _commerce_ccavenue_verify($payment_method) {
+  $working_key = $payment_method['settings']['working_key'];
+  $authdesc = $_REQUEST['AuthDesc'];
+  $merchant_id = $_REQUEST['Merchant_Id'];
+  $order_id =  $_REQUEST['Order_Id'];
+  $amount  = $_REQUEST['Amount'];
+  $checksum = $_REQUEST['Checksum'];
+  return _commerce_ccavenue_verify_checksum($merchant_id, $order_id, $amount, $authdesc, $checksum, $working_key);
+}
+
+function _commerce_ccavenue_getchecksum($merchantid, $amount, $orderid, $url, $workingkey) { 
+  $str = "$merchantid|$orderid|$amount|$url|$workingkey"; 
+  $adler = 1; 
+  $adler = _commerce_ccavenue_adler32($adler, $str); 
+  return $adler; 
+} 
+
+function _commerce_ccavenue_verify_checksum($merchantid, $orderid, $amount, $authdesc, $checksum, $workingkey) { 
+  $str = "$merchantid|$orderid|$amount|$authdesc|$workingkey"; 
+  $adler = 1; 
+  $adler = _commerce_ccavenue_adler32($adler, $str); 
+
+  if ( $adler == $checksum ) 
+  return "true" ; 
+  else 
+  return "false" ; 
+}
+
+function _commerce_ccavenue_adler32($adler, $str) { 
+  $base = 65521; 
+  $s1 = $adler & 0xffff; 
+  $s2 = ($adler >> 16) & 0xffff; 
+  for ( $i = 0 ; $i < strlen($str) ; $i++ )  { 
+    $s1 = ($s1 + Ord($str[$i])) % $base ; 
+    $s2 = ($s2 + $s1) % $base ; 
+    //echo "s1 : $s1 <BR> s2 : $s2 <BR>"; 
+   } 
+  return _commerce_ccavenue_leftshift($s2 , 16) + $s1; 
+}
+
+function _commerce_ccavenue_leftshift($str, $num) { 
+ $str = decbin($str);
+  for ( $i = 0 ; $i < (64 - strlen($str)); $i++ ) 
+  $str = "0" . $str ; 
+  for ( $i = 0 ; $i < $num ; $i++ ) { 
+    $str = $str . "0";
+    $str = substr($str , 1 ); 
+    //echo "str : $str <BR>";
+   } 
+  return _commerce_ccavenue_cdec($str); 
+}
+
+function _commerce_ccavenue_cdec($num) { 
+  $dec = '';
+  for ($n = 0 ; $n < strlen($num); $n++ ) { 
+    $temp = $num[$n] ; 
+    $dec = $dec + $temp*pow(2 , strlen($num) - $n - 1); 
+  }
+  return $dec; 
+}
