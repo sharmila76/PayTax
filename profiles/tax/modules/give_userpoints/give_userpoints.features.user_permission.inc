@@ -14,6 +14,7 @@ function give_userpoints_user_default_permissions() {
   $permissions['create answer content'] = array(
     'name' => 'create answer content',
     'roles' => array(
+      'administrator' => 'administrator',
       'consultant' => 'consultant',
     ),
     'module' => 'node',
@@ -23,6 +24,7 @@ function give_userpoints_user_default_permissions() {
   $permissions['create question content'] = array(
     'name' => 'create question content',
     'roles' => array(
+      'administrator' => 'administrator',
       'customer' => 'customer',
     ),
     'module' => 'node',
@@ -32,6 +34,7 @@ function give_userpoints_user_default_permissions() {
   $permissions['delete own answer content'] = array(
     'name' => 'delete own answer content',
     'roles' => array(
+      'administrator' => 'administrator',
       'consultant' => 'consultant',
     ),
     'module' => 'node',
@@ -41,7 +44,7 @@ function give_userpoints_user_default_permissions() {
   $permissions['delete own question content'] = array(
     'name' => 'delete own question content',
     'roles' => array(
-      'customer' => 'customer',
+      'administrator' => 'administrator',
     ),
     'module' => 'node',
   );
@@ -49,7 +52,10 @@ function give_userpoints_user_default_permissions() {
   // Exported permission: 'edit own answer content'.
   $permissions['edit own answer content'] = array(
     'name' => 'edit own answer content',
-    'roles' => array(),
+    'roles' => array(
+      'administrator' => 'administrator',
+      'consultant' => 'consultant',
+    ),
     'module' => 'node',
   );
 

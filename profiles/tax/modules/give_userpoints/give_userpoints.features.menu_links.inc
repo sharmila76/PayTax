@@ -14,7 +14,7 @@ function give_userpoints_menu_default_menu_links() {
   $menu_links['main-menu_post-your-question:node/add/question'] = array(
     'menu_name' => 'main-menu',
     'link_path' => 'node/add/question',
-    'router_path' => 'node/add/question',
+    'router_path' => 'node/add',
     'link_title' => 'Post your question',
     'options' => array(
       'attributes' => array(
