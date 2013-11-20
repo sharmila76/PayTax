@@ -1,0 +1,23 @@
+<?php
+function discussion_schema() {
+    $schema['consultant_node'] = array(
+        'description' => 'consultant user id',
+        'fields' => array(
+            'uid' => array(
+                'description' => 'Primary key for our table of user id',
+                'type' => 'int',
+                'unsigned' => TRUE,
+                'not null' => TRUE,
+            ),
+            'qid' => array(
+                'description' => 'the question id',
+                'type' => 'int',
+                'unsigned' => TRUE,
+                'not null' => TRUE
+            ),
+        ),
+        'primary key' => array('qid'),
+    );
+    return $schema;
+}
+?>
