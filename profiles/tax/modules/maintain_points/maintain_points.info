@@ -1,0 +1,5 @@
+name = Maintain points
+description = Keep track of user points
+
+core = 7.x
+

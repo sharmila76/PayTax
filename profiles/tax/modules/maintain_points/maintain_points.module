@@ -1,0 +1,73 @@
+<?php
+
+/**
+ * Implements hook_menu().
+ */
+function maintain_points_menu() {
+  $items['maintain_points/add'] = array(
+    'title' => 'Add categories and points',
+    'page callback' => 'drupal_get_form',
+    'page arguments' => array('maintain_points_form'),  
+    'access callback' => TRUE,
+    //'expanded' => TRUE,
+  );
+  
+  return $items;
+}
+
+function maintain_points_form($form, &$form_state) {
+  $form = array();
+  $form['container'] = array(
+    '#type' => 'fieldset',
+    '#prefix' => '<div id="msg">',
+    '#suffix' => '</div>',
+  );
+  $form['container']['data'] = array(
+    '#type' => 'markup',
+    '#markup' => 'category and points',
+  );
+  $form['container']['category'] = array(
+    '#type' => 'textfield',
+    '#title' => t('category'),
+    '#required' => TRUE,
+    '#size' => 45,
+    '#attributes' => array('class' => array('question_category'), 'id' => array('category_1')),
+    '#prefix' => '<table><tr><td>',
+    '#suffix' => '</td>',    
+  );
+  $form['container']['points'] = array(
+    '#type' => 'textfield',
+    '#title' => t('points'),
+    '#required' => TRUE,
+    '#size' => 45,
+    '#attributes' => array('class' => array('category_points'), 'id' => array('point_1')),
+    '#prefix' => '<td>',
+    '#suffix' => '</td></tr></table>',      
+  );
+  $form['submit'] = array(
+    '#type' => 'submit',
+    '#value' => t('Save category and points'),
+    '#ajax' => array(
+      'callback' => 'maintain_points_form_callback',
+      'wrapper' => 'data',
+    ),
+  );
+  
+  return $form;
+}
+
+function maintain_points_form_callback(&$form, &$form_state) {
+  db_insert('categories')
+  ->fields(array(
+      'category' => $form_state['values']['category'],
+      'point' => $form_state['values']['points'],
+  ))
+  ->execute();
+  $datas = array();
+  $datas[] = array('category' => $form_state['values']['category'],
+          'points' => $form_state['values']['points']);
+  $form['container']['data']['#markup'] = $datas;
+  $form['container']['category']['#value'] = '';
+  $form['container']['points']['#value'] = '';
+  return $form['container'];
+}
