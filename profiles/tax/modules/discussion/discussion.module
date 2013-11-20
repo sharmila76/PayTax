@@ -17,7 +17,9 @@ function discussion_menu() {
 
     return $items;
 }
-
+function discussion_init() {
+  drupal_add_js(drupal_get_path('module', 'discussion') .'/js/discussion.js', 'file');
+}
 function discussion_permission() {
     return array(
         'router content' => array(
@@ -42,14 +44,24 @@ function question_assign_form($form, &$form_state) {
         '#description' => t('display all consultant'),
         '#options' => _get_consultant(),
     );
+
+    $header = array(
+        'question' => array('data' => t('Questions'), 'field' => 'n.title'),
+    );
     $form['questions'] = array(
-        '#type' => 'checkboxes',
+        '#type' => 'tableselect',
         '#options' => _get_all_questions(),
+        '#header'=> $header,
+        
+        
     );
     $form['submit'] = array(
         '#type' => 'submit',
         '#value' => 'Assign',
-      );
+        '#prefix'=>'<div class ="discussion_form_submit">',
+        '#suffix'=>'</div>'
+        
+    );
 
     return $form;
 }
@@ -89,7 +101,14 @@ function _get_all_questions() {
             ->condition('type', 'question')
             ->execute();
     foreach ($questions as $question) {
-        $all_question[$question->nid] = $question->title;
+        $all_question[$question->nid] = array('question' => array(
+                    'data' => array(
+                        '#type' => 'link',
+                        '#title' => $question->title,
+                        '#href' => 'node/' . $question->nid
+                    ),
+                ),
+          ); 
     }
     return $all_question;
 }
@@ -103,7 +122,7 @@ function view_an_assigned_questions_form($form, &$formstate) {
         '#theme' => 'table',
         '#header' => $header,
         '#rows' => _assign_questions_to_particular_consultant(),
-        );
+    );
 
     return $form;
 }
@@ -131,5 +150,4 @@ function _assign_questions_to_particular_consultant() {
     }
     return $title;
 }
-
 
