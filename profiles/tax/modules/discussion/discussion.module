@@ -84,14 +84,18 @@ function _get_consultant() {
           ->fields('u', array('uid', 'name'))
           ->execute();
   foreach ($users as $user) {
-    $uid = $user->uid;
-    $tot_user = user_load($uid);
+    if (!empty($user)) {
+      $uid = $user->uid;
+      $tot_user = user_load($uid);
 
-    if (!empty($tot_user->roles[3])) {
-      $name[$tot_user->uid] = $tot_user->name;
+      if (!empty($tot_user->roles[3])) {
+        $name[$tot_user->uid] = $tot_user->name;
+      }
     }
   }
-  return $name;
+  if (!empty($name)) {
+    return $name;
+  }
 }
 
 function _get_all_questions() {
@@ -131,7 +135,6 @@ function _get_all_questions() {
         }
       }
     }
-    
   } else {
     foreach ($questions as $question) {
       $all_question[$question->nid] = array('question' => array(
@@ -143,9 +146,8 @@ function _get_all_questions() {
           ),
       );
     }
-    
   }
-  if (!empty($all_question)){
+  if (!empty($all_question)) {
     return $all_question;
   }
 }
