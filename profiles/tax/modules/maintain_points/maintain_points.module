@@ -4,7 +4,7 @@
  * Implements hook_menu().
  */
 function maintain_points_menu() {
-  $items['maintain_points/add'] = array(
+  $items['maintain_points'] = array(
     'title' => 'Add categories and points',
     'page callback' => 'drupal_get_form',
     'page arguments' => array('maintain_points_form'),  
@@ -15,59 +15,90 @@ function maintain_points_menu() {
   return $items;
 }
 
-function maintain_points_form($form, &$form_state) {
-  $form = array();
-  $form['container'] = array(
+function maintain_points_form($form, &$form_state, $no_js_use = FALSE) {  
+  $form['#tree'] = TRUE;
+  $form['names_fieldset'] = array(
     '#type' => 'fieldset',
-    '#prefix' => '<div id="msg">',
+    '#title' => t('Category and Points'),    
+    '#prefix' => '<div id="names-fieldset-wrapper">',
     '#suffix' => '</div>',
+  );  
+  if (empty($form_state['num_names'])) {
+    $form_state['num_names'] = 1;
+  }
+  for ($i = 0; $i < $form_state['num_names']; $i++) {
+    $form['names_fieldset']['categories'][$i] = array(
+      '#type' => 'fieldset',
+    );   
+    $form['names_fieldset']['categories'][$i]['category'] = array(
+      '#type' => 'textfield',
+      '#title' => t('Category'),
+      '#prefix' => '<table><tr><td>',
+      '#suffix' => '</td>',  
+      '#size' => 20,
+    );
+    $form['names_fieldset']['categories'][$i]['point'] = array(
+      '#type' => 'textfield',
+      '#title' => t('Points'),      
+      '#size' => 20,
+      '#prefix' => '<td>',
+      '#suffix' => '</td></tr></table>', 
+    );
+  }
+  $form['names_fieldset']['add_category_and_points'] = array(
+    '#type' => 'submit',
+    '#value' => t('Add category and points'),
+    '#submit' => array('maintain_points_add_more_add_one'),
+    '#ajax' => array(
+      'callback' => 'maintain_points_add_more_callback',
+      'wrapper' => 'names-fieldset-wrapper',
+    ),
   );
-  $form['container']['data'] = array(
-    '#type' => 'markup',
-    '#markup' => 'category and points',
-  );
-  $form['container']['category'] = array(
-    '#type' => 'textfield',
-    '#title' => t('category'),
-    '#required' => TRUE,
-    '#size' => 45,
-    '#attributes' => array('class' => array('question_category'), 'id' => array('category_1')),
-    '#prefix' => '<table><tr><td>',
-    '#suffix' => '</td>',    
-  );
-  $form['container']['points'] = array(
-    '#type' => 'textfield',
-    '#title' => t('points'),
-    '#required' => TRUE,
-    '#size' => 45,
-    '#attributes' => array('class' => array('category_points'), 'id' => array('point_1')),
-    '#prefix' => '<td>',
-    '#suffix' => '</td></tr></table>',      
-  );
+  if ($form_state['num_names'] > 1) {
+    $form['names_fieldset']['remove_category_and_points'] = array(
+      '#type' => 'submit',
+      '#value' => t('Remove last one'),
+      '#submit' => array('maintain_points_add_more_remove_one'),
+      '#ajax' => array(
+        'callback' => 'maintain_points_add_more_callback',
+        'wrapper' => 'names-fieldset-wrapper',
+      ),
+    );
+  }
   $form['submit'] = array(
     '#type' => 'submit',
-    '#value' => t('Save category and points'),
-    '#ajax' => array(
-      'callback' => 'maintain_points_form_callback',
-      'wrapper' => 'data',
-    ),
+    '#value' => t('Submit'),
   );
   
   return $form;
 }
 
-function maintain_points_form_callback(&$form, &$form_state) {
-  db_insert('categories')
-  ->fields(array(
-      'category' => $form_state['values']['category'],
-      'point' => $form_state['values']['points'],
+function maintain_points_add_more_callback($form, $form_state) {
+  //dpm($form_state);
+  return $form['names_fieldset'];
+}
+
+function maintain_points_add_more_add_one($form, &$form_state) {
+  $form_state['num_names']++;
+  $form_state['rebuild'] = TRUE;
+}
+
+function maintain_points_add_more_remove_one($form, &$form_state) {
+  if ($form_state['num_names'] > 1) {
+    $form_state['num_names']--;
+  }
+  $form_state['rebuild'] = TRUE;
+}
+
+function maintain_points_form_submit($form, &$form_state) {
+  global $user;
+  for($i=0; $i<$form_state['num_names']; $i++){
+    db_insert('categories')
+            ->fields(array(
+                'uid' => $user->uid,
+                'category' => $form_state['values']['names_fieldset']['categories'][$i]['category'],
+                'points' => $form_state['values']['names_fieldset']['categories'][$i]['point'],
   ))
-  ->execute();
-  $datas = array();
-  $datas[] = array('category' => $form_state['values']['category'],
-          'points' => $form_state['values']['points']);
-  $form['container']['data']['#markup'] = $datas;
-  $form['container']['category']['#value'] = '';
-  $form['container']['points']['#value'] = '';
-  return $form['container'];
+  ->execute();  
+  }  
 }

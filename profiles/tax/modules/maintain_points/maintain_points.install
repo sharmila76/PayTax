@@ -1,0 +1,30 @@
+<?php
+
+function maintain_points_install() {
+  cache_clear_all('autoload:', 'cache');
+}
+
+function maintain_points_schema() {
+    $schema['categories'] = array(
+    'fields' => array(      
+      'uid' => array(
+        'type' => 'int',
+        'unsigned' => TRUE,
+        'not null' => TRUE,
+      ),
+      'category' => array(
+        'description' => 'Type of the question',
+        'type' => 'varchar',
+        'length' => 255,
+        'not null' => TRUE,
+      ),
+      'points' => array(
+        'description' => 'Give points to the category',
+        'type' => 'int',
+        'unsigned' => TRUE,
+        'not null' => TRUE,
+      ),     
+    ),    
+  );
+    return $schema;
+}
