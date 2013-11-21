@@ -1,153 +1,190 @@
 <?php
 
 function discussion_menu() {
-    $items = array();
-    $items['assign/question'] = array(
-        'title' => 'Assign questions to consultant',
-        'page callback' => 'drupal_get_form',
-        'page arguments' => array('question_assign_form'),
-        'access arguments' => array('router content')
-    );
-    $items['view/consultant'] = array(
-        'title' => 'view an assigned questions',
-        'page callback' => 'drupal_get_form',
-        'page arguments' => array('view_an_assigned_questions_form'),
-        'access arguments' => array('consultant content')
-    );
+  $items = array();
+  $items['assign/question'] = array(
+      'title' => 'Assign questions to consultant',
+      'page callback' => 'drupal_get_form',
+      'page arguments' => array('question_assign_form'),
+      'access arguments' => array('router content')
+  );
+  $items['view/consultant'] = array(
+      'title' => 'view an assigned questions',
+      'page callback' => 'drupal_get_form',
+      'page arguments' => array('view_an_assigned_questions_form'),
+      'access arguments' => array('consultant content')
+  );
 
-    return $items;
+  return $items;
 }
+
 function discussion_init() {
-  drupal_add_js(drupal_get_path('module', 'discussion') .'/js/discussion.js', 'file');
+  drupal_add_js(drupal_get_path('module', 'discussion') . '/js/discussion.js', 'file');
 }
+
 function discussion_permission() {
-    return array(
-        'router content' => array(
-            'title' => t('Assign Questions to consultants '),
-            'description' => t('Router only can access this permission .'),
-        ),
-        'consultant content' => array(
-            'title' => t('view the allocated questions'),
-            'description' => t('Consultant view the allocated questions')
-        )
-    );
+  return array(
+      'router content' => array(
+          'title' => t('Assign Questions to consultants '),
+          'description' => t('Router only can access this permission .'),
+      ),
+      'consultant content' => array(
+          'title' => t('view the allocated questions'),
+          'description' => t('Consultant view the allocated questions')
+      )
+  );
 }
 
 function question_assign_form($form, &$form_state) {
-    $form = array();
+  $form = array();
 
-    $form['#tree'] = TRUE;
-    $form['user'] = array(
-        '#type' => 'select',
-        '#title' => t('Consultant'),
-        '#required' => TRUE,
-        '#description' => t('display all consultant'),
-        '#options' => _get_consultant(),
-    );
+  $form['#tree'] = TRUE;
+  $form['user'] = array(
+      '#type' => 'select',
+      '#title' => t('Consultant'),
+      '#required' => TRUE,
+      '#description' => t('display all consultant'),
+      '#options' => _get_consultant(),
+  );
 
-    $header = array(
-        'question' => array('data' => t('Questions'), 'field' => 'n.title'),
-    );
-    $form['questions'] = array(
-        '#type' => 'tableselect',
-        '#options' => _get_all_questions(),
-        '#header'=> $header,
-        
-        
-    );
-    $form['submit'] = array(
-        '#type' => 'submit',
-        '#value' => 'Assign',
-        '#prefix'=>'<div class ="discussion_form_submit">',
-        '#suffix'=>'</div>'
-        
-    );
+  $header = array(
+      'question' => array('data' => t('Questions'), 'field' => 'n.title'),
+  );
+  $form['questions'] = array(
+      '#type' => 'tableselect',
+      '#options' => _get_all_questions(),
+      '#header' => $header,
+  );
+  $form['submit'] = array(
+      '#type' => 'submit',
+      '#value' => 'Assign',
+      '#prefix' => '<div class ="discussion_form_submit">',
+      '#suffix' => '</div>'
+  );
 
-    return $form;
+  return $form;
 }
 
 function question_assign_form_submit($form, &$form_state) {
-    drupal_set_message('questions are assigned to consultant');
-    $uid = $form_state['values']['user'];
-    foreach ($form_state['values']['questions'] as $questions) {
-        if (!empty($questions)) {
-            $qid = $questions;
-            db_insert('consultant_node')
-                    ->fields(array('uid' => $uid,
-                        'qid' => $qid))
-                    ->execute();
-        }
+  drupal_set_message('questions are assigned to consultant');
+  $uid = $form_state['values']['user'];
+  foreach ($form_state['values']['questions'] as $questions) {
+    if (!empty($questions)) {
+      $qid = $questions;
+      db_insert('consultant_node')
+              ->fields(array('uid' => $uid,
+                  'qid' => $qid))
+              ->execute();
     }
+  }
 }
 
 function _get_consultant() {
-    $users = db_select('users', 'u')
-            ->fields('u', array('uid', 'name'))
-            ->execute();
-    foreach ($users as $user) {
-        $uid = $user->uid;
-        $tot_user = user_load($uid);
+  $users = db_select('users', 'u')
+          ->fields('u', array('uid', 'name'))
+          ->execute();
+  foreach ($users as $user) {
+    $uid = $user->uid;
+    $tot_user = user_load($uid);
 
-        if (!empty($tot_user->roles[3])) {
-            $name[$tot_user->uid] = $tot_user->name;
-        }
+    if (!empty($tot_user->roles[3])) {
+      $name[$tot_user->uid] = $tot_user->name;
     }
-    return $name;
+  }
+  return $name;
 }
 
 function _get_all_questions() {
-    $questions = db_select('node', 'n')
-            ->fields('n', array('nid', 'title', 'type'))
-            ->condition('type', 'question')
-            ->execute();
-    foreach ($questions as $question) {
-        $all_question[$question->nid] = array('question' => array(
-                    'data' => array(
-                        '#type' => 'link',
-                        '#title' => $question->title,
-                        '#href' => 'node/' . $question->nid
-                    ),
-                ),
-          ); 
+  $questions = db_select('node', 'n')
+          ->fields('n', array('nid', 'title', 'type'))
+          ->condition('type', 'question')
+          ->execute();
+
+  $assigned_nodes = db_select('consultant_node', 'c')
+          ->fields('c', array('qid'))
+          ->execute();
+  $i = 0;
+  foreach ($assigned_nodes as $assigned_node) {
+
+    if (isset($assigned_node->qid)) {
+      $i = $i + 1;
+      $qids[$i] = $assigned_node->qid;
+      $i++;
     }
+  }
+  if (!empty($qids)) {
+    foreach ($questions as $question) {
+      $nid = $question->nid;
+      // $qid=reset($qids);
+      if (!empty($qids)) {
+        if (array_search($nid, $qids)) {
+          continue;
+        } else {
+          $all_question[$nid] = array('question' => array(
+                  'data' => array(
+                      '#type' => 'link',
+                      '#title' => $question->title,
+                      '#href' => 'node/' . $question->nid
+                  ),
+              ),
+          );
+        }
+      }
+    }
+    
+  } else {
+    foreach ($questions as $question) {
+      $all_question[$question->nid] = array('question' => array(
+              'data' => array(
+                  '#type' => 'link',
+                  '#title' => $question->title,
+                  '#href' => 'node/' . $question->nid
+              ),
+          ),
+      );
+    }
+    
+  }
+  if (!empty($all_question)){
     return $all_question;
+  }
 }
 
 function view_an_assigned_questions_form($form, &$formstate) {
-    $header = array(
-        'question' => array('data' => t('Questions'), 'field' => 'n.title'),
-    );
-    $form = array();
-    $form['questions'] = array(
-        '#theme' => 'table',
-        '#header' => $header,
-        '#rows' => _assign_questions_to_particular_consultant(),
-    );
+  $header = array(
+      'question' => array('data' => t('Questions'), 'field' => 'n.title'),
+  );
+  $form = array();
+  $form['questions'] = array(
+      '#theme' => 'table',
+      '#header' => $header,
+      '#rows' => _assign_questions_to_particular_consultant(),
+  );
 
-    return $form;
+  return $form;
 }
 
 function _assign_questions_to_particular_consultant() {
-    global $user;
-    $title = array();
-    $uids_qids = db_select('consultant_node', 'u')
-            ->fields('u', array('uid', 'qid'))
-            ->condition('uid', $user->uid, '=')
-            ->execute();
-    foreach ($uids_qids as $uid_qid) {
-        $question_id = $uid_qid->qid;
-        if ($user->uid == $uid_qid->uid) {
-            $node = node_load($question_id);
-            $title[$node->nid] = array('question' => array(
-                    'data' => array(
-                        '#type' => 'link',
-                        '#title' => $node->title,
-                        '#href' => 'node/' . $node->nid
-                    ),
-                ),
-            );
-        }
+  global $user;
+  $title = array();
+  $uids_qids = db_select('consultant_node', 'u')
+          ->fields('u', array('uid', 'qid'))
+          ->condition('uid', $user->uid, '=')
+          ->execute();
+  foreach ($uids_qids as $uid_qid) {
+    $question_id = $uid_qid->qid;
+    if ($user->uid == $uid_qid->uid) {
+      $node = node_load($question_id);
+      $title[$node->nid] = array('question' => array(
+              'data' => array(
+                  '#type' => 'link',
+                  '#title' => $node->title,
+                  '#href' => 'node/' . $node->nid
+              ),
+          ),
+      );
     }
-    return $title;
+  }
+  return $title;
 }
 
