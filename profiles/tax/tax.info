@@ -35,6 +35,7 @@ dependencies[] = ctools
 dependencies[] = entity
 dependencies[] = features
 dependencies[] = flag
+dependencies[] = maintain_points
 dependencies[] = pathauto
 dependencies[] = profile2_regpath
 dependencies[] = rules

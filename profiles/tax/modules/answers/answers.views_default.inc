@@ -76,25 +76,6 @@ function answers_views_default_views() {
     0 => 'question',
   );
   $handler->display->display_options['show_title'] = 0;
-  $translatables['answers_to_a_question'] = array(
-    t('Defaults'),
-    t('more'),
-    t('Apply'),
-    t('Reset'),
-    t('Sort by'),
-    t('Asc'),
-    t('Desc'),
-    t('Items per page'),
-    t('- All -'),
-    t('Offset'),
-    t('« first'),
-    t('‹ previous'),
-    t('next ›'),
-    t('last »'),
-    t('<em>No answers yet</em>'),
-    t('All'),
-    t('Entity content'),
-  );
   $export['answers_to_a_question'] = $view;
 
   $view = new view();
@@ -120,7 +101,7 @@ function answers_views_default_views() {
   $handler->display->display_options['style_options']['columns'] = array(
     'title' => 'title',
     'created' => 'created',
-    'entity_id' => 'entity_id',
+    'entity_id' => 'title',
   );
   $handler->display->display_options['style_options']['default'] = 'created';
   $handler->display->display_options['style_options']['info'] = array(
@@ -129,18 +110,21 @@ function answers_views_default_views() {
       'default_sort_order' => 'asc',
       'align' => 'views-align-left',
       'separator' => '',
+      'empty_column' => 0,
     ),
     'created' => array(
       'sortable' => 1,
       'default_sort_order' => 'desc',
       'align' => 'views-align-center',
       'separator' => '',
+      'empty_column' => 0,
     ),
     'entity_id' => array(
       'sortable' => 1,
       'default_sort_order' => 'desc',
       'align' => 'views-align-center',
       'separator' => '',
+      'empty_column' => 0,
     ),
   );
   $handler->display->display_options['style_options']['sticky'] = TRUE;
@@ -158,7 +142,7 @@ function answers_views_default_views() {
   $handler->display->display_options['fields']['created']['id'] = 'created';
   $handler->display->display_options['fields']['created']['table'] = 'node';
   $handler->display->display_options['fields']['created']['field'] = 'created';
-  $handler->display->display_options['fields']['created']['date_format'] = 'raw time ago';
+  $handler->display->display_options['fields']['created']['date_format'] = 'short';
   /* Field: Content: Answer Count */
   $handler->display->display_options['fields']['entity_id']['id'] = 'entity_id';
   $handler->display->display_options['fields']['entity_id']['table'] = 'field_data_field_answer_count';
@@ -232,9 +216,10 @@ function answers_views_default_views() {
   $handler->display->display_options['filters']['field_answer_count_count']['operator'] = '<';
   $handler->display->display_options['filters']['field_answer_count_count']['value']['value'] = '1';
   $handler->display->display_options['path'] = 'questions/unanswered';
-  $handler->display->display_options['menu']['type'] = 'tab';
   $handler->display->display_options['menu']['title'] = 'Unanswered Questions';
   $handler->display->display_options['menu']['weight'] = '30';
+  $handler->display->display_options['menu']['context'] = 0;
+  $handler->display->display_options['menu']['context_only_inline'] = 0;
 
   /* Display: Search Questions */
   $handler = $view->new_display('page', 'Search Questions', 'page_4');
@@ -307,39 +292,6 @@ function answers_views_default_views() {
   $handler->display->display_options['filters']['keys']['expose']['operator'] = 'keys_op';
   $handler->display->display_options['filters']['keys']['expose']['identifier'] = 'keys';
   $handler->display->display_options['path'] = 'questions/continue_ask';
-  $translatables['questions_list'] = array(
-    t('Defaults'),
-    t('more'),
-    t('Apply'),
-    t('Reset'),
-    t('Sort by'),
-    t('Asc'),
-    t('Desc'),
-    t('Items per page'),
-    t('- All -'),
-    t('Offset'),
-    t('« first'),
-    t('‹ previous'),
-    t('next ›'),
-    t('last »'),
-    t('<em>No questions match....</em>'),
-    t('Question'),
-    t('Post date'),
-    t('Answers'),
-    t('none'),
-    t('Default Page View'),
-    t('All Questions'),
-    t('<em>No results ....</em>'),
-    t('Unanswered Questions'),
-    t('<em>All questions have been answered ...</em>'),
-    t('Search Questions'),
-    t('Search for questions'),
-    t('Search for a question'),
-    t('Search: Search Terms'),
-    t('Search & Add Page'),
-    t('Check whether your question has already been asked'),
-    t('<em>No questions match ....</em>'),
-  );
   $export['questions_list'] = $view;
 
   $view = new view();
@@ -471,30 +423,6 @@ function answers_views_default_views() {
   $handler->display->display_options['menu']['title'] = 'Questions Answered';
   $handler->display->display_options['menu']['description'] = 'Questions to which you have provided answers';
   $handler->display->display_options['menu']['weight'] = '20';
-  $translatables['user_answers'] = array(
-    t('Master'),
-    t('more'),
-    t('Apply'),
-    t('Reset'),
-    t('Sort by'),
-    t('Asc'),
-    t('Desc'),
-    t('Items per page'),
-    t('- All -'),
-    t('Offset'),
-    t('« first'),
-    t('‹ previous'),
-    t('next ›'),
-    t('last »'),
-    t('<em>You have not yet answered any questions ...</em>'),
-    t('field_answer_question'),
-    t('author'),
-    t('Question'),
-    t('Post date'),
-    t('Answers'),
-    t('All'),
-    t('User Profile - Questions Answered'),
-  );
   $export['user_answers'] = $view;
 
   $view = new view();
@@ -611,30 +539,6 @@ function answers_views_default_views() {
   $handler->display->display_options['menu']['title'] = 'Questions Asked';
   $handler->display->display_options['menu']['description'] = 'Questions You Have Asked';
   $handler->display->display_options['menu']['weight'] = '0';
-  $translatables['user_questions'] = array(
-    t('Master'),
-    t('more'),
-    t('Apply'),
-    t('Reset'),
-    t('Sort by'),
-    t('Asc'),
-    t('Desc'),
-    t('Items per page'),
-    t('- All -'),
-    t('Offset'),
-    t('« first'),
-    t('‹ previous'),
-    t('next ›'),
-    t('last »'),
-    t('<em>You have not yet asked any questions ...</em>'),
-    t('author'),
-    t('Question'),
-    t('Post date'),
-    t('Answers'),
-    t('All'),
-    t('Your Questions'),
-    t('Questions Asked'),
-  );
   $export['user_questions'] = $view;
 
   return $export;
