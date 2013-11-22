@@ -1,5 +1,9 @@
 name = Maintain points
 description = Keep track of user points
-
 core = 7.x
+dependencies[] = views
+files[] = maintain_points.module
+files[] = maintain_points.install
+files[] = views/maintain_points.views.inc
+
 
