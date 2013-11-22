@@ -148,6 +148,38 @@ function answers_field_default_field_bases() {
     'type' => 'list_boolean',
   );
 
+  // Exported field_base: 'field_select_category'
+  $field_bases['field_select_category'] = array(
+    'active' => 1,
+    'cardinality' => 1,
+    'deleted' => 0,
+    'entity_types' => array(),
+    'field_name' => 'field_select_category',
+    'foreign keys' => array(),
+    'indexes' => array(
+      'value' => array(
+        0 => 'value',
+      ),
+    ),
+    'locked' => 0,
+    'module' => 'list',
+    'settings' => array(
+      'allowed_values' => array(),
+      'allowed_values_function' => 'cck_allowed_values_php',
+      'allowed_values_php' => '$select_category = db_select(\'categories\', \'c\')
+            ->fields(\'c\', array(\'category\', \'points\'))
+            ->execute()
+            ->fetchAll();
+foreach($select_category as $value) {
+  $cat_points[$value->category . \'--\' . $value->points] = $value->category . \'--\' . $value->points;
+}
+return $cat_points;',
+      'profile2_private' => FALSE,
+    ),
+    'translatable' => 0,
+    'type' => 'list_text',
+  );
+
   // Exported field_base: 'field_upload_document'
   $field_bases['field_upload_document'] = array(
     'active' => 1,
@@ -299,7 +331,7 @@ function answers_field_default_field_instances() {
         'label' => 'inline',
         'settings' => array(),
         'type' => 'hidden',
-        'weight' => 2,
+        'weight' => 4,
       ),
       'teaser' => array(
         'label' => 'above',
@@ -324,7 +356,7 @@ function answers_field_default_field_instances() {
       'module' => 'nodereference_count',
       'settings' => array(),
       'type' => 'nodereference_count_widget',
-      'weight' => -2,
+      'weight' => 1,
     ),
   );
 
@@ -368,7 +400,7 @@ function answers_field_default_field_instances() {
         'display_label' => 1,
       ),
       'type' => 'options_onoff',
-      'weight' => -3,
+      'weight' => -4,
     ),
   );
 
@@ -387,7 +419,7 @@ function answers_field_default_field_instances() {
         'label' => 'inline',
         'settings' => array(),
         'type' => 'hidden',
-        'weight' => 3,
+        'weight' => 5,
       ),
       'teaser' => array(
         'label' => 'above',
@@ -414,6 +446,39 @@ function answers_field_default_field_instances() {
     ),
   );
 
+  // Exported field_instance: 'node-question-field_select_category'
+  $field_instances['node-question-field_select_category'] = array(
+    'bundle' => 'question',
+    'default_value' => NULL,
+    'default_value_function' => '',
+    'default_value_php' => '',
+    'deleted' => 0,
+    'description' => 'Please select category for your question',
+    'display' => array(
+      'default' => array(
+        'label' => 'above',
+        'module' => 'list',
+        'settings' => array(),
+        'type' => 'list_default',
+        'weight' => 2,
+      ),
+    ),
+    'entity_type' => 'node',
+    'field_name' => 'field_select_category',
+    'label' => 'Select Category',
+    'required' => 1,
+    'settings' => array(
+      'user_register_form' => FALSE,
+    ),
+    'widget' => array(
+      'active' => 1,
+      'module' => 'options',
+      'settings' => array(),
+      'type' => 'options_select',
+      'weight' => -3,
+    ),
+  );
+
   // Exported field_instance: 'node-question-field_upload_document'
   $field_instances['node-question-field_upload_document'] = array(
     'bundle' => 'question',
@@ -425,7 +490,7 @@ function answers_field_default_field_instances() {
         'module' => 'file',
         'settings' => array(),
         'type' => 'file_default',
-        'weight' => 4,
+        'weight' => 3,
       ),
     ),
     'entity_type' => 'node',
@@ -446,7 +511,7 @@ function answers_field_default_field_instances() {
         'progress_indicator' => 'throbber',
       ),
       'type' => 'file_generic',
-      'weight' => 31,
+      'weight' => -2,
     ),
   );
 
@@ -456,7 +521,9 @@ function answers_field_default_field_instances() {
   t('Answer to the question');
   t('Description');
   t('Notify on Answer');
+  t('Please select category for your question');
   t('Question Locked');
+  t('Select Category');
   t('Upload document');
   t('Upload your document for proof');
   t('Would you like to receive notifications by email when users post answers to your question?');
