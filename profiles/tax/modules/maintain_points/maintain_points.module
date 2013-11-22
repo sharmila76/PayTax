@@ -11,8 +11,11 @@ function maintain_points_menu() {
       'access callback' => TRUE,
           //'expanded' => TRUE,
   );
+ 
+}
 
-  return $items;
+function maintain_points_views_api() {
+  return array('api' => 3, 'path' => drupal_get_path('module', 'maintain_points') . '/view',);
 }
 
 function maintain_points_form($form, &$form_state, $no_js_use = FALSE) {
@@ -101,35 +104,4 @@ function maintain_points_form_submit($form, &$form_state) {
             ))
             ->execute();
   }
-}
-
-function maintain_points_form_alter(&$form, &$form_state, $form_id) {
-  if ($form_id == 'question_node_form') {
-    $form['catagories_points'] = array(
-      '#type' => 'select',
-      '#title' => t('Category'),
-      '#options' => _get_catagories_user_points()
-    );
-    //$form['submit'] = array(
-      //'#type' => 'submit',
-      //'#options' => 
-    //);
-  }
-  return $form;
-}
-
-function _get_catagories_user_points() {
-  $categories = db_select('categories', 'n')
-          ->fields('n', array('uid', 'category', 'points'))
-          ->execute();
-  foreach ($categories as $category) {
-    $get_category[] = $category->category . '-' . $category->points;
-  }
-  return $get_category;
-}
-
-function question_node_form_submit($form, &$form_state) {
-  drupal_set_message('hai');
-  $category = $form_state['values']['catagories_points'];
-  print $category;
 }
