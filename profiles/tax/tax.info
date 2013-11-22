@@ -49,3 +49,4 @@ dependencies[] = views_ui
 ; custom modules
 dependencies[] = user_roles
 dependencies[] = give_userpoints
+dependencies[] = discussion 
