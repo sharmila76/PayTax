@@ -33,29 +33,5 @@ function give_userpoints_default_rules_configuration() {
       ]
     }
   }');
-  $items['rules_deduct_points_when_a_user_post_question'] = entity_import('rules_config', '{ "rules_deduct_points_when_a_user_post_question" : {
-      "LABEL" : "deduct points when a user post question",
-      "PLUGIN" : "reaction rule",
-      "OWNER" : "rules",
-      "TAGS" : [ "deduct points" ],
-      "REQUIRES" : [ "rules", "userpoints_rules" ],
-      "ON" : { "node_insert--question" : { "bundle" : "question" } },
-      "IF" : [
-        { "user_has_role" : { "account" : [ "node:author" ], "roles" : { "value" : { "4" : "4" } } } }
-      ],
-      "DO" : [
-        { "userpoints_action_grant_points" : {
-            "user" : [ "node:author" ],
-            "points" : "-1",
-            "tid" : "0",
-            "entity" : [ "" ],
-            "operation" : "[node:author]",
-            "display" : 1,
-            "moderate" : "default"
-          }
-        }
-      ]
-    }
-  }');
   return $items;
 }
