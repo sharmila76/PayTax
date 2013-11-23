@@ -45,7 +45,8 @@ dependencies[] = userpoints_nc
 dependencies[] = userpoints_rules
 dependencies[] = views
 dependencies[] = views_ui
-dependencies[] = features_extra
+dependencies[] = fe_profile
+
 
 
 ; custom modules
