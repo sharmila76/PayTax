@@ -155,23 +155,3 @@ function bartik_field__taxonomy_term_reference($variables) {
   return $output;
 }
 
-function bartik_preprocess_page(&$vars) {
-  global $user;
-  if ($vars['is_front']) {
-    $select_category = db_select('categories', 'c')
-            ->fields('c', array('category', 'points'))
-            ->execute()
-            ->fetchAll();
-    $cat_points = '<table>';
-    foreach($select_category as $value) {
-      $cat_points .= '<tr><td>';
-      $cat_points .=  $value->category;
-      $cat_points .= '</td>';
-      $cat_points .= '<td>';
-      $cat_points .=  $value->points;
-      $cat_points .= '</td><tr>';
-      //$vars['page']['content'] = $cat_points;
-    }
-  }
-  
-}

@@ -25,7 +25,6 @@ function give_userpoints_user_default_permissions() {
     'name' => 'create question content',
     'roles' => array(
       'administrator' => 'administrator',
-      'customer' => 'customer',
     ),
     'module' => 'node',
   );
@@ -35,7 +34,6 @@ function give_userpoints_user_default_permissions() {
     'name' => 'delete own answer content',
     'roles' => array(
       'administrator' => 'administrator',
-      'consultant' => 'consultant',
     ),
     'module' => 'node',
   );
@@ -54,7 +52,6 @@ function give_userpoints_user_default_permissions() {
     'name' => 'edit own answer content',
     'roles' => array(
       'administrator' => 'administrator',
-      'consultant' => 'consultant',
     ),
     'module' => 'node',
   );
@@ -64,7 +61,6 @@ function give_userpoints_user_default_permissions() {
     'name' => 'view own userpoints',
     'roles' => array(
       'administrator' => 'administrator',
-      'customer' => 'customer',
     ),
     'module' => 'userpoints',
   );
