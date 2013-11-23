@@ -11,7 +11,6 @@ function maintain_points_menu() {
       'access callback' => TRUE,
           //'expanded' => TRUE,
   );
- 
 }
 
 function maintain_points_form($form, &$form_state, $no_js_use = FALSE) {
@@ -72,7 +71,7 @@ function maintain_points_form($form, &$form_state, $no_js_use = FALSE) {
   return $form;
 }
 
-function maintain_points_add_more_callback($form, $form_state) {  
+function maintain_points_add_more_callback($form, $form_state) {
   return $form['names_fieldset'];
 }
 
@@ -101,12 +100,35 @@ function maintain_points_form_submit($form, &$form_state) {
   }
 }
 
-function maintain_points_form_alter(&$form, &$form_state, $form_id) {  
+function maintain_points_form_alter(&$form, &$form_state, $form_id) {
   if ($form_id == 'question_node_form') {
     $form['actions']['submit']['#submit'][] = 'maintain_points_submit_callback_function';
   }
 }
 
 function maintain_points_submit_callback_function($form, &$form_state) {
-  $value = $form_state['values']['field_select_category']['und'][0]['value'];  
+  global $user;
+  if (in_array('customer', $user->roles)) {
+    $value = $form_state['values']['field_select_category']['und'][0]['value'];
+    $cat_value = explode('--', $value);
+    //select userpoints
+    $userpoints = db_select('userpoints', 'u')
+            ->fields('u', array('points'))
+            ->condition('uid', $user->uid, '=')
+            ->execute()
+            ->fetchAssoc();
+    if ($cat_value[1] <= $userpoints['points']) {
+      $reduce_points = $userpoints['points'] - $cat_value[1];
+      db_update('userpoints')
+              ->fields(array(
+                  'points' => $reduce_points,
+              ))
+              ->condition('uid', $user->uid, '=')
+              ->execute();
+    }
+    else {
+      //restrict user when they don't have sufficient point.
+      return FALSE;
+    }
+  }
 }
