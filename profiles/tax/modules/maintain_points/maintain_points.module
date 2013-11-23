@@ -11,6 +11,7 @@ function maintain_points_menu() {
       'access callback' => TRUE,
           //'expanded' => TRUE,
   );
+  return $items;
 }
 
 function maintain_points_form($form, &$form_state, $no_js_use = FALSE) {
