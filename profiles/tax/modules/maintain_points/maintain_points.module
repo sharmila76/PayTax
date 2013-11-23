@@ -105,3 +105,50 @@ function maintain_points_form_submit($form, &$form_state) {
             ->execute();
   }
 }
+
+function maintain_points_form_alter(&$form, &$form_state, $form_id) {
+  if ($form_id == 'question_node_form') {
+    $form['actions']['submit']['#submit'][] = 'maintain_points_submit_callback_function';
+    $form['#validate'][] = 'maintain_points_validate_function';    
+  }
+}
+
+function maintain_points_validate_function(&$form, &$form_state) {
+  $value = $form_state['values']['field_select_category']['und'][0]['value'];
+  global $user;
+  if (in_array('customer', $user->roles)) {    
+    $cat_value = explode('--', $value);
+    //select userpoints
+    $userpoints = db_select('userpoints', 'u')
+            ->fields('u', array('points'))
+            ->condition('uid', $user->uid, '=')
+            ->execute()
+            ->fetchAssoc();
+    if ($cat_value[1] >= $userpoints['points']) {
+      form_set_error('field_select_category', 'You don\'t have sufficient points');
+    }    
+  }
+}
+
+function maintain_points_submit_callback_function($form, &$form_state) {
+  global $user;
+  if (in_array('customer', $user->roles)) {
+    $value = $form_state['values']['field_select_category']['und'][0]['value'];
+    $cat_value = explode('--', $value);
+    //select userpoints
+    $userpoints = db_select('userpoints', 'u')
+            ->fields('u', array('points'))
+            ->condition('uid', $user->uid, '=')
+            ->execute()
+            ->fetchAssoc();
+    if ($cat_value[1] <= $userpoints['points']) {
+      $reduce_points = $userpoints['points'] - $cat_value[1];
+      db_update('userpoints')
+              ->fields(array(
+                  'points' => $reduce_points,
+              ))
+              ->condition('uid', $user->uid, '=')
+              ->execute();
+    }
+  }
+}
