@@ -45,6 +45,7 @@ dependencies[] = userpoints_nc
 dependencies[] = userpoints_rules
 dependencies[] = views
 dependencies[] = views_ui
+dependencies[] = features_extra
 
 ; custom modules
 dependencies[] = user_roles

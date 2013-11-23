@@ -15,7 +15,6 @@ function give_userpoints_user_default_permissions() {
     'name' => 'create answer content',
     'roles' => array(
       'administrator' => 'administrator',
-      'consultant' => 'consultant',
     ),
     'module' => 'node',
   );
