@@ -164,7 +164,10 @@ function maintain_points_form_validate($form, &$form_state) {
     if (empty($form_state['values']['names_fieldset']['categories'][$i]['category'])) {
       form_set_error('category', t("you should provide the categories"));
     }
-    if (!ctype_alpha($form_state['values']['names_fieldset']['categories'][$i]['category'])) {
+  /**  if (!($form_state['values']['names_fieldset']['categories'][$i]['point']) > 0){
+      form_set_error('point', t('Negative points not allowed '));
+    }**/
+    if (!ctype_alpha(str_replace(' ','',$form_state['values']['names_fieldset']['categories'][$i]['category']))) {
       form_set_error('category', t('you should enter the category in alphabets '));
     }
     if (empty($form_state['values']['names_fieldset']['categories'][$i]['point'])) {
@@ -173,5 +176,6 @@ function maintain_points_form_validate($form, &$form_state) {
     if(!is_numeric($form_state['values']['names_fieldset']['categories'][$i]['point'])) {
       form_set_error('point', t("you should provide the points in numeric"));
     }
+   
   }
 }
