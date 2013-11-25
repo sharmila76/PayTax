@@ -8,7 +8,7 @@ function maintain_points_menu() {
       'title' => 'Add categories and points',
       'page callback' => 'drupal_get_form',
       'page arguments' => array('maintain_points_form'),
-      'access callback' => TRUE,
+      'access arguments' => array('maintain_points_form_admin_access'),
           //'expanded' => TRUE,
   );
   return $items;
@@ -17,7 +17,14 @@ function maintain_points_menu() {
 function maintain_points_views_api() {
   return array('api' => 3, 'path' => drupal_get_path('module', 'maintain_points') . '/view',);
 }
-
+function maintain_points_permission() {
+  return array(
+      'maintain_points_form_admin_access' => array(
+          'title' => 'maintain_points_access_permission',
+          'description' => 'Admin can only view this maintain_points'
+      ),
+  );
+}
 function maintain_points_form($form, &$form_state, $no_js_use = FALSE) {
   $form['#tree'] = TRUE;
   $form['names_fieldset'] = array(
@@ -149,6 +156,22 @@ function maintain_points_submit_callback_function($form, &$form_state) {
               ))
               ->condition('uid', $user->uid, '=')
               ->execute();
+    }
+  }
+}
+function maintain_points_form_validate($form, &$form_state) {
+  for ($i = 0; $i < $form_state['num_names']; $i++) {
+    if (empty($form_state['values']['names_fieldset']['categories'][$i]['category'])) {
+      form_set_error('category', t("you should provide the categories"));
+    }
+    if (!ctype_alpha($form_state['values']['names_fieldset']['categories'][$i]['category'])) {
+      form_set_error('category', t('you should enter the category in alphabets '));
+    }
+    if (empty($form_state['values']['names_fieldset']['categories'][$i]['point'])) {
+      form_set_error('point', t("you should provide the points"));
+    } 
+    if(!is_numeric($form_state['values']['names_fieldset']['categories'][$i]['point'])) {
+      form_set_error('point', t("you should provide the points in numeric"));
     }
   }
 }

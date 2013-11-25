@@ -13,54 +13,42 @@ function give_userpoints_user_default_permissions() {
   // Exported permission: 'create answer content'.
   $permissions['create answer content'] = array(
     'name' => 'create answer content',
-    'roles' => array(
-      'administrator' => 'administrator',
-    ),
+    'roles' => array(),
     'module' => 'node',
   );
 
   // Exported permission: 'create question content'.
   $permissions['create question content'] = array(
     'name' => 'create question content',
-    'roles' => array(
-      'administrator' => 'administrator',
-    ),
+    'roles' => array(),
     'module' => 'node',
   );
 
   // Exported permission: 'delete own answer content'.
   $permissions['delete own answer content'] = array(
     'name' => 'delete own answer content',
-    'roles' => array(
-      'administrator' => 'administrator',
-    ),
+    'roles' => array(),
     'module' => 'node',
   );
 
   // Exported permission: 'delete own question content'.
   $permissions['delete own question content'] = array(
     'name' => 'delete own question content',
-    'roles' => array(
-      'administrator' => 'administrator',
-    ),
+    'roles' => array(),
     'module' => 'node',
   );
 
   // Exported permission: 'edit own answer content'.
   $permissions['edit own answer content'] = array(
     'name' => 'edit own answer content',
-    'roles' => array(
-      'administrator' => 'administrator',
-    ),
+    'roles' => array(),
     'module' => 'node',
   );
 
   // Exported permission: 'view own userpoints'.
   $permissions['view own userpoints'] = array(
     'name' => 'view own userpoints',
-    'roles' => array(
-      'administrator' => 'administrator',
-    ),
+    'roles' => array(),
     'module' => 'userpoints',
   );
 
