@@ -121,13 +121,14 @@ function maintain_points_form_alter(&$form, &$form_state, $form_id) {
         '#rows' => 2,
         '#title' => 'Question',
         '#required' => TRUE,
-        '#wysiwyg' => TRUE,
-        //'#text_format' => 'html', 
+        //'#wysiwyg' => TRUE,
+        '#format' => 'filtered_html', 
     ); 
     
     $form['actions']['submit']['#submit'][] = 'maintain_points_submit_callback_function';
     $form['#validate'][] = 'maintain_points_validate_function';
-
+    unset($form['actions']['preview']);
+    unset($form['field_notify_p']);
     return $form;
   }
 }
