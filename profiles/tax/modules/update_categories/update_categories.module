@@ -1,0 +1,96 @@
+<?php
+
+function update_categories_menu() {
+  $items['update_categories'] = array(
+      'title' => 'Add categories and points',
+      'page callback' => 'drupal_get_form',
+      'page arguments' => array('update_categories_form'),
+      'access callback' => TRUE
+          //'expanded' => TRUE,
+  );
+  return $items;
+}
+
+function update_categories_form($form, &$form_state) {
+  $categories = get_category();
+  $points = get_points();
+  $num_of_category = count($categories);
+  $form['categories_fieldset'] = array(
+      '#type' => 'fieldset',
+      '#prefix' => '<table>',
+      '#suffix' => '</table>',
+      '#tree' => TRUE,
+  );
+  $form['categories_fieldset']['header'] = array(
+      '#markup' => '<thead>
+      <tr>
+      <th>categories</th>
+      <th>points</th>
+      </tr>
+  </thead>',
+  );
+  for ($i = 0; $i < $num_of_category; $i++) {
+    $form['categories_fieldset']['row_' . $i] = array(
+        '#prefix' => '<tr>',
+        '#suffix' => '</tr>',
+    );
+    $form['categories_fieldset']['row_' . $i]['categories'] = array(
+        '#type' => 'textfield',
+        '#default_value' => $categories[$i],
+        '#size' => '15',
+        '#prefix' => '<td>',
+        '#suffix' => '</td>',
+    );
+    $form['categories_fieldset']['row_' . $i]['points'] = array(
+        '#type' => 'textfield',
+        '#size' => '5',
+        '#default_value' => $points[$i],
+        '#prefix' => '<td>',
+        '#suffix' => '</td>'
+    );
+  }
+  $form['submit'] = array(
+      '#type' => 'submit',
+      '#value' => 'update'
+  );
+
+  return $form;
+}
+
+function update_categories_form_submit($form, $form_state) {
+  drupal_set_message('updated successfully');
+  $num_of_rows = count($form_state['values']['categories_fieldset']);
+  for ($i = 0; $i < $num_of_rows; $i++) {
+    $categories = get_category();
+    $points = get_points();
+    if ($categories[$i] != $form_state['values']['categories_fieldset']['row_' . $i]['categories']||($points[$i] != $form_state['values']['categories_fieldset']['row_' . $i]['points'])) {
+      db_update('categories')
+              ->fields(array(
+                  'category' => $form_state['values']['categories_fieldset']['row_' . $i]['categories'],
+                  'points'  => $form_state['values']['categories_fieldset']['row_'. $i]['points']
+                  ))
+              ->condition('id', $i + 1, '=')
+              ->execute();
+    } 
+  }
+}
+
+function get_category() {
+  $categories = db_select('categories', 'c')
+          ->fields('c', array('category'))
+          ->execute();
+  foreach ($categories as $category) {
+    $get_categories[] = $category->category;
+  }
+  return $get_categories;
+}
+
+function get_points() {
+  $points = db_select('categories', 'p')
+          ->fields('p', array('points'))
+          ->execute();
+  foreach ($points as $point) {
+    $get_points[] = $point->points;
+  }
+  return $get_points;
+}
