@@ -6,4 +6,5 @@ files[] = maintain_points.module
 files[] = maintain_points.install
 files[] = views/maintain_points.views.inc
 
+scripts[] = js/maintain_points.js
 
