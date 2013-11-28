@@ -25,7 +25,6 @@ features[user_permission][] = delete own answer content
 features[user_permission][] = delete own question content
 features[user_permission][] = edit own answer content
 features[user_permission][] = view own userpoints
-features[views_view][] = display_the_categories_and_userpoints_in_admin_page
 features_exclude[dependencies][menu] = menu
 features_exclude[dependencies][ctools] = ctools
 features_exclude[menu_custom][main-menu] = main-menu
