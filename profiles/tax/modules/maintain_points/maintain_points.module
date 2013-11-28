@@ -229,26 +229,14 @@ function maintain_points_form_alter(&$form, &$form_state, $form_id) {
         '#required' => TRUE,
     );
 
-    $categories = get_all_category();
+    $categories = get_all_category_points();
     $form['field_select_category'] = array(
         '#title' => t('Select Category'),
         '#type' => 'select',
         '#required' => TRUE,
         '#options' => $categories,
-        //'#default_value' => 'hai',
+        '#description' => t('Select Category'),
     );
-    foreach ($categories as $category => $cat_name) {
-      $form['field_cat'] = array(
-          '#type' => 'container',
-          '#states' => array(
-              'visible' => array('select[name="field_select_category"]' => array('value' => $cat_name)),
-          ),
-      );
-      $form['field_cat']['markup'] = array(
-          '#markup' => 'For this category ' . get_category_points($cat_name) . ' points will be reduced.',
-      );
-    }
-
     $form['actions']['submit']['#submit'][] = 'maintain_points_submit_callback_function';
     $form['#validate'][] = 'maintain_points_validate_function';
     unset($form['actions']['preview']);
@@ -257,22 +245,13 @@ function maintain_points_form_alter(&$form, &$form_state, $form_id) {
   }
 }
 
-function get_category_points($cat_name) {
-  $select_points = db_select('categories', 'c')
-          ->fields('c', array('points'))
-          ->condition('category', $cat_name)
-          ->execute()
-          ->fetchAssoc();
-  return $select_points['points'];
-}
-
-function get_all_category() {
+function get_all_category_points() {
   $select_category = db_select('categories', 'c')
-          ->fields('c', array('category'))
+          ->fields('c', array('category', 'points'))
           ->execute()
           ->fetchAll();
   foreach ($select_category as $value) {
-    $cat_points[$value->category] = $value->category;
+    $cat_points[$value->category . '-' . $value->points] = $value->category . '-' . $value->points;
   }
   return $cat_points;
 }
@@ -281,7 +260,7 @@ function maintain_points_validate_function(&$form, &$form_state) {
   $value = $form_state['values']['field_select_category']['und'][0]['value'];
   global $user;
   if (in_array('customer', $user->roles)) {
-    $cat_value = explode('--', $value);
+    $cat_value = explode('-', $value);
     //select userpoints
     $userpoints = db_select('userpoints', 'u')
             ->fields('u', array('points'))
@@ -298,7 +277,7 @@ function maintain_points_submit_callback_function($form, &$form_state) {
   global $user;
   if (in_array('customer', $user->roles)) {
     $value = $form_state['values']['field_select_category']['und'][0]['value'];
-    $cat_value = explode('--', $value);
+    $cat_value = explode('-', $value);
     //select userpoints
     $userpoints = db_select('userpoints', 'u')
             ->fields('u', array('points'))
