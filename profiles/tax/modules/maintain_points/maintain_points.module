@@ -267,7 +267,8 @@ function get_all_category_points() {
 }
 
 function maintain_points_validate_function(&$form, &$form_state) {
-  $value = $form_state['values']['field_select_category']['und'][0]['value'];
+  //dpm($form_state);
+  $value = $form_state['values']['field_select_category'];
   global $user;
   if (in_array('customer', $user->roles)) {
     $cat_value = explode('-', $value);
@@ -286,7 +287,7 @@ function maintain_points_validate_function(&$form, &$form_state) {
 function maintain_points_submit_callback_function($form, &$form_state) {
   global $user;
   if (in_array('customer', $user->roles)) {
-    $value = $form_state['values']['field_select_category']['und'][0]['value'];
+    $value = $form_state['values']['field_select_category'];
     $cat_value = explode('-', $value);
     //select userpoints
     $userpoints = db_select('userpoints', 'u')
