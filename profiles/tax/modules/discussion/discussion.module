@@ -15,6 +15,13 @@ function discussion_menu() {
       'access arguments' => array('consultant content')
   );
 
+  $items['maintain/viewed/node'] = array(
+      'title' => 'questions',
+      'page callback' => 'drupal_get_form',
+      'page arguments' => array('maintain_viewed_questions'),
+      'access callback' => TRUE
+          //'expanded' => TRUE,
+  );
   return $items;
 }
 
@@ -50,7 +57,6 @@ function question_assign_form($form, &$form_state) {
       '#type' => 'tableselect',
       '#header' => $header,
       '#options' => _get_all_questions(),
-     
   );
   $form['submit'] = array(
       '#type' => 'submit',
@@ -95,7 +101,6 @@ function _get_consultant() {
     return $name;
   }
   return $empty;
-  
 }
 
 function _get_all_questions() {
@@ -190,3 +195,92 @@ function _assign_questions_to_particular_consultant() {
   return $title;
 }
 
+function maintain_viewed_questions($form, &$form_state) {
+  $form['categories_fieldset'] = array(
+      '#type' => 'fieldset',
+      '#prefix' => '<table>',
+      '#suffix' => '</table>',
+      '#tree' => TRUE,
+  );
+  $header = array(
+      'all_question' => array('data' => t('Questions')),
+  );
+
+  $form['questions_answers'] = array(
+      '#theme' => 'table',
+      '#header' => $header,
+      '#rows' => check_questions_viewed_or_not()
+  );
+
+
+  return $form;
+}
+
+function check_questions_viewed_or_not() {
+  global $user;
+  $title = array();
+  $questions = db_select('node', 'n')
+          ->fields('n', array('nid', 'title', 'type'))
+          ->condition('type', 'question')
+          ->execute();
+  $num_of_questions = $questions->rowCount();
+  foreach ($questions as $question) {
+    $question_nid = $question->nid;
+    $question_node = node_load($question_nid);
+    $answer_count = $question_node->field_answer_count['und'][0]['count'];
+    if (!empty($answer_count)) {
+      $answers = db_select('node', 'n')
+              ->fields('n', array('nid', 'title', 'type'))
+              ->condition('type', 'answer')
+              ->execute();
+      foreach ($answers as $answer) {
+        $answer_nid = $answer->nid;
+        $answer_node = node_load($answer_nid);
+        $qid = $answer_node->field_answer_question['und'][0]['nid'];
+        if ($qid == $question_nid) {
+          $viewed_answer = db_select('node_view_count', 'n')
+                  ->fields('n', array('uid', 'nid'))
+                  ->condition('uid',$user->uid,'=')
+                  ->condition('nid',$answer_nid,'=')
+                  ->execute()
+                  ->fetchAssoc();
+          $viewed_answer_nid = $viewed_answer['nid'];
+            if ($answer_nid == $viewed_answer_nid) {
+              $title[$question_node->nid] = array('all_question' => array(
+                      'data' => array(
+                          '#type' => 'link',
+                          '#title' => $question->title,
+                          '#href' => 'node/' . $question->nid
+                      ),
+                  ),
+              );
+            }
+            else{
+              $title[$question_node->nid] = array('all_question' => array(
+                      'data' => array(
+                          '#type' => 'link',
+                          '#title' => $question->title . '"new"',
+                          '#href' => 'node/' . $question->nid
+                      ),
+                  ),
+              );
+              
+              
+            }
+          }
+        }
+      
+    } else {
+      $title[$question_node->nid] = array('all_question' => array(
+              'data' => array(
+                  '#type' => 'link',
+                  '#title' => $question->title ,
+                  '#href' => 'node/' . $question->nid
+              ),
+          ),
+      );
+    }
+  }
+
+  return $title;
+}
