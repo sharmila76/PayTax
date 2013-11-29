@@ -222,16 +222,14 @@ function answers_field_default_field_bases() {
     'locked' => 0,
     'module' => 'list',
     'settings' => array(
-      'allowed_values' => array(),
-      'allowed_values_function' => 'cck_allowed_values_php',
-      'allowed_values_php' => '$select_category = db_select(\'categories\', \'c\')
-            ->fields(\'c\', array(\'category\', \'points\'))
-            ->execute()
-            ->fetchAll();
-foreach($select_category as $value) {
-  $cat_points[$value->category . \'--\' . $value->points] = $value->category . \'--\' . $value->points;
-}
-return $cat_points;',
+      'allowed_values' => array(
+        'Home loan-2' => 'Home loan',
+        'Jewel loan-4' => 'Jewel loan',
+        'Education loan-6' => 'Education loan',
+        'Human loan-8' => 'Human loan',
+      ),
+      'allowed_values_function' => '',
+      'allowed_values_php' => '',
       'profile2_private' => FALSE,
     ),
     'translatable' => 0,
@@ -498,7 +496,7 @@ function answers_field_default_field_instances() {
         'display_label' => 1,
       ),
       'type' => 'options_onoff',
-      'weight' => 2,
+      'weight' => 4,
     ),
   );
 
@@ -585,14 +583,14 @@ function answers_field_default_field_instances() {
     'default_value_function' => '',
     'default_value_php' => '',
     'deleted' => 0,
-    'description' => 'Please select category for your question',
+    'description' => 'Category for the question',
     'display' => array(
       'default' => array(
         'label' => 'above',
         'module' => 'list',
         'settings' => array(),
         'type' => 'list_default',
-        'weight' => 2,
+        'weight' => 7,
       ),
     ),
     'entity_type' => 'node',
@@ -607,7 +605,7 @@ function answers_field_default_field_instances() {
       'module' => 'options',
       'settings' => array(),
       'type' => 'options_select',
-      'weight' => 3,
+      'weight' => 2,
     ),
   );
 
@@ -643,7 +641,7 @@ function answers_field_default_field_instances() {
         'progress_indicator' => 'throbber',
       ),
       'type' => 'file_generic',
-      'weight' => 4,
+      'weight' => 3,
     ),
   );
 
@@ -652,9 +650,9 @@ function answers_field_default_field_instances() {
   t('Answer');
   t('Answer Count');
   t('Answer to the question');
+  t('Category for the question');
   t('Description');
   t('Notify on Answer');
-  t('Please select category for your question');
   t('Question');
   t('Question Locked');
   t('Select Category');

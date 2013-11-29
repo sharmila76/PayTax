@@ -32,12 +32,12 @@ function maintain_points_form($form, &$form_state, $no_js_use = FALSE) {
   $points = get_points();
   $num_of_category = count($categories);
   if (!empty($num_of_category)) {
-      $form['categories_fieldset'] = array(
+    $form['categories_fieldset'] = array(
         '#prefix' => '<table id="maintain_points_ajax">',
         '#suffix' => '</table>',
         '#tree' => TRUE,
-   );
-      $form['categories_fieldset']['header'] = array(
+    );
+    $form['categories_fieldset']['header'] = array(
         '#markup' => '<thead>
         <tr>
         <th>categories</th>
@@ -45,7 +45,7 @@ function maintain_points_form($form, &$form_state, $no_js_use = FALSE) {
         </tr>
         </thead>',
     );
-   for ($i = 0; $i < $num_of_category; $i++) {
+    for ($i = 0; $i < $num_of_category; $i++) {
       $form['categories_fieldset']['row_' . $i] = array(
           '#prefix' => '<tr>',
           '#suffix' => '</tr>',
@@ -129,6 +129,7 @@ function maintain_points_form($form, &$form_state, $no_js_use = FALSE) {
 
   return $form;
 }
+
 function update_categories_and_points($form, &$form_state) {
   $num_of_rows = count($form_state['values']['categories_fieldset']);
   $num_of_categories = $num_of_rows - 1;
@@ -141,7 +142,7 @@ function update_categories_and_points($form, &$form_state) {
                   'category' => $form_state['values']['categories_fieldset']['row_' . $i]['categories'],
                   'points' => $form_state['values']['categories_fieldset']['row_' . $i]['points']
               ))
-              ->condition('id', $i+1, '=')
+              ->condition('id', $i + 1, '=')
               ->execute();
     }
   }
@@ -161,6 +162,7 @@ function get_category() {
     return $get_categories;
   }
 }
+
 function get_points() {
   $empty = array();
   $points = db_select('categories', 'p')
@@ -171,13 +173,12 @@ function get_points() {
       $get_points[] = $point->points;
     }
   }
-    if (!empty($get_points)) {
-      return $get_points;
+  if (!empty($get_points)) {
+    return $get_points;
   } else {
-      return $empty;
+    return $empty;
   }
 }
-
 
 function maintain_points_add_more_callback($form, $form_state) {
   //dpm($form_state);
@@ -197,23 +198,23 @@ function maintain_points_add_more_remove_one($form, &$form_state) {
 }
 
 function maintain_points_form_validate($form, &$form_state) {
-  /**for ($i = 0; $i < $form_state['num_names']; $i++) {
+  /*   * for ($i = 0; $i < $form_state['num_names']; $i++) {
     if (empty($form_state['values']['names_fieldset']['categories'][$i]['category'])) {
-      form_set_error('category', t("you should provide the categories"));
+    form_set_error('category', t("you should provide the categories"));
     }
     /**  if (!($form_state['values']['names_fieldset']['categories'][$i]['point']) > 0){
-      form_set_error('point', t('Negative points not allowed '));
-      }
+    form_set_error('point', t('Negative points not allowed '));
+    }
     if (!ctype_alpha(str_replace(' ', '', $form_state['values']['names_fieldset']['categories'][$i]['category']))) {
-      form_set_error('category', t('you should enter the category in alphabets '));
+    form_set_error('category', t('you should enter the category in alphabets '));
     }
     if (empty($form_state['values']['names_fieldset']['categories'][$i]['point'])) {
-      form_set_error('point', t("you should provide the points"));
+    form_set_error('point', t("you should provide the points"));
     }
     if (!is_numeric($form_state['values']['names_fieldset']['categories'][$i]['point'])) {
-      form_set_error('point', t("you should provide the points in numeric"));
+    form_set_error('point', t("you should provide the points in numeric"));
     }
-  }**/
+    }* */
 }
 
 function maintain_points_form_submit($form, &$form_state) {
@@ -229,73 +230,37 @@ function maintain_points_form_submit($form, &$form_state) {
   }
 }
 
-/**function maintain_points_form_alter(&$form, &$form_state, $form_id) {
+function maintain_points_form_alter(&$form, &$form_state, $form_id) {
   if ($form_id == 'question_node_form') {
-    //TODO: use auto title module.
     $categories = get_all_category_points();
-    $form['field_select_category'] = array(
-        '#title' => t('Select Category'),
-        '#type' => 'select',
-        '#required' => TRUE,
-        '#options' => $categories,
-        '#description' => t('Select Category'),
-    );
-    $form['actions']['submit']['#submit'][] = 'maintain_points_submit_callback_function';
-    $form['#validate'][] = 'maintain_points_validate_function';
+    // Get the field info
+    $info = field_info_field('field_select_category');
+    if (!empty($info)) {
+      // Get a reference to the values
+      $values = &$info['settings']['allowed_values'];
+      // Manipulate the values in some way, e.g.
+      $values = $categories;
+      // Save the field
+      field_update_field($info);
+    }
+    drupal_add_js(array('maintain_points' => array('categories_list' => array(json_encode($categories)))), 'setting');
+    //$form['actions']['submit']['#submit'][] = 'maintain_points_submit_callback_function';
+    //$form['#validate'][] = 'maintain_points_validate_function';
     unset($form['actions']['preview']);
     unset($form['field_notify_p']);
     return $form;
   }
-}**/
+}
 
 function get_all_category_points() {
   $select_category = db_select('categories', 'c')
           ->fields('c', array('category', 'points'))
           ->execute()
           ->fetchAll();
-  foreach ($select_category as $value) {
-    $cat_points[$value->category . '-' . $value->points] = $value->category . '-' . $value->points;
-  }
-  return $cat_points;
-}
-
-function maintain_points_validate_function(&$form, &$form_state) {
-  //dpm($form_state);
-  $value = $form_state['values']['field_select_category'];
-  global $user;
-  if (in_array('customer', $user->roles)) {
-    $cat_value = explode('-', $value);
-    //select userpoints
-    $userpoints = db_select('userpoints', 'u')
-            ->fields('u', array('points'))
-            ->condition('uid', $user->uid, '=')
-            ->execute()
-            ->fetchAssoc();
-    if ($cat_value[1] >= $userpoints['points']) {
-      form_set_error('field_select_category', 'You don\'t have sufficient points');
+  if (!empty($select_category)) {
+    foreach ($select_category as $value) {
+      $cat_points[$value->category . '-' . $value->points] = $value->category;
     }
-  }
-}
-
-function maintain_points_submit_callback_function($form, &$form_state) {
-  global $user;
-  if (in_array('customer', $user->roles)) {
-    $value = $form_state['values']['field_select_category'];
-    $cat_value = explode('-', $value);
-    //select userpoints
-    $userpoints = db_select('userpoints', 'u')
-            ->fields('u', array('points'))
-            ->condition('uid', $user->uid, '=')
-            ->execute()
-            ->fetchAssoc();
-    if ($cat_value[1] <= $userpoints['points']) {
-      $reduce_points = $userpoints['points'] - $cat_value[1];
-      db_update('userpoints')
-              ->fields(array(
-                  'points' => $reduce_points,
-              ))
-              ->condition('uid', $user->uid, '=')
-              ->execute();
-    }
+    return $cat_points;
   }
 }
