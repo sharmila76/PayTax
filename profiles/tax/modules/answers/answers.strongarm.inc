@@ -13,6 +13,48 @@ function answers_strongarm() {
   $strongarm = new stdClass();
   $strongarm->disabled = FALSE; /* Edit this to true to make a default strongarm disabled initially */
   $strongarm->api_version = 1;
+  $strongarm->name = 'ant_answer';
+  $strongarm->value = '1';
+  $export['ant_answer'] = $strongarm;
+
+  $strongarm = new stdClass();
+  $strongarm->disabled = FALSE; /* Edit this to true to make a default strongarm disabled initially */
+  $strongarm->api_version = 1;
+  $strongarm->name = 'ant_pattern_answer';
+  $strongarm->value = '[node:field-answer]';
+  $export['ant_pattern_answer'] = $strongarm;
+
+  $strongarm = new stdClass();
+  $strongarm->disabled = FALSE; /* Edit this to true to make a default strongarm disabled initially */
+  $strongarm->api_version = 1;
+  $strongarm->name = 'ant_pattern_question';
+  $strongarm->value = '[node:field-question]';
+  $export['ant_pattern_question'] = $strongarm;
+
+  $strongarm = new stdClass();
+  $strongarm->disabled = FALSE; /* Edit this to true to make a default strongarm disabled initially */
+  $strongarm->api_version = 1;
+  $strongarm->name = 'ant_php_answer';
+  $strongarm->value = 0;
+  $export['ant_php_answer'] = $strongarm;
+
+  $strongarm = new stdClass();
+  $strongarm->disabled = FALSE; /* Edit this to true to make a default strongarm disabled initially */
+  $strongarm->api_version = 1;
+  $strongarm->name = 'ant_php_question';
+  $strongarm->value = 0;
+  $export['ant_php_question'] = $strongarm;
+
+  $strongarm = new stdClass();
+  $strongarm->disabled = FALSE; /* Edit this to true to make a default strongarm disabled initially */
+  $strongarm->api_version = 1;
+  $strongarm->name = 'ant_question';
+  $strongarm->value = '1';
+  $export['ant_question'] = $strongarm;
+
+  $strongarm = new stdClass();
+  $strongarm->disabled = FALSE; /* Edit this to true to make a default strongarm disabled initially */
+  $strongarm->api_version = 1;
   $strongarm->name = 'comment_anonymous_answer';
   $strongarm->value = 0;
   $export['comment_anonymous_answer'] = $strongarm;
@@ -133,7 +175,10 @@ function answers_strongarm() {
     'extra_fields' => array(
       'form' => array(
         'title' => array(
-          'weight' => '1',
+          'weight' => '2',
+        ),
+        'path' => array(
+          'weight' => '4',
         ),
       ),
       'display' => array(),
@@ -169,10 +214,10 @@ function answers_strongarm() {
     'extra_fields' => array(
       'form' => array(
         'title' => array(
-          'weight' => '-5',
+          'weight' => '0',
         ),
         'path' => array(
-          'weight' => '30',
+          'weight' => '7',
         ),
       ),
       'display' => array(
@@ -186,6 +231,38 @@ function answers_strongarm() {
     ),
   );
   $export['field_bundle_settings_node__question'] = $strongarm;
+
+  $strongarm = new stdClass();
+  $strongarm->disabled = FALSE; /* Edit this to true to make a default strongarm disabled initially */
+  $strongarm->api_version = 1;
+  $strongarm->name = 'menu_options_answer';
+  $strongarm->value = array(
+    0 => 'main-menu',
+  );
+  $export['menu_options_answer'] = $strongarm;
+
+  $strongarm = new stdClass();
+  $strongarm->disabled = FALSE; /* Edit this to true to make a default strongarm disabled initially */
+  $strongarm->api_version = 1;
+  $strongarm->name = 'menu_options_question';
+  $strongarm->value = array(
+    0 => 'main-menu',
+  );
+  $export['menu_options_question'] = $strongarm;
+
+  $strongarm = new stdClass();
+  $strongarm->disabled = FALSE; /* Edit this to true to make a default strongarm disabled initially */
+  $strongarm->api_version = 1;
+  $strongarm->name = 'menu_parent_answer';
+  $strongarm->value = 'main-menu:0';
+  $export['menu_parent_answer'] = $strongarm;
+
+  $strongarm = new stdClass();
+  $strongarm->disabled = FALSE; /* Edit this to true to make a default strongarm disabled initially */
+  $strongarm->api_version = 1;
+  $strongarm->name = 'menu_parent_question';
+  $strongarm->value = 'main-menu:0';
+  $export['menu_parent_question'] = $strongarm;
 
   $strongarm = new stdClass();
   $strongarm->disabled = FALSE; /* Edit this to true to make a default strongarm disabled initially */
@@ -204,6 +281,34 @@ function answers_strongarm() {
     0 => 'status',
   );
   $export['node_options_question'] = $strongarm;
+
+  $strongarm = new stdClass();
+  $strongarm->disabled = FALSE; /* Edit this to true to make a default strongarm disabled initially */
+  $strongarm->api_version = 1;
+  $strongarm->name = 'node_preview_answer';
+  $strongarm->value = '1';
+  $export['node_preview_answer'] = $strongarm;
+
+  $strongarm = new stdClass();
+  $strongarm->disabled = FALSE; /* Edit this to true to make a default strongarm disabled initially */
+  $strongarm->api_version = 1;
+  $strongarm->name = 'node_preview_question';
+  $strongarm->value = '1';
+  $export['node_preview_question'] = $strongarm;
+
+  $strongarm = new stdClass();
+  $strongarm->disabled = FALSE; /* Edit this to true to make a default strongarm disabled initially */
+  $strongarm->api_version = 1;
+  $strongarm->name = 'node_submitted_answer';
+  $strongarm->value = 1;
+  $export['node_submitted_answer'] = $strongarm;
+
+  $strongarm = new stdClass();
+  $strongarm->disabled = FALSE; /* Edit this to true to make a default strongarm disabled initially */
+  $strongarm->api_version = 1;
+  $strongarm->name = 'node_submitted_question';
+  $strongarm->value = 1;
+  $export['node_submitted_question'] = $strongarm;
 
   return $export;
 }

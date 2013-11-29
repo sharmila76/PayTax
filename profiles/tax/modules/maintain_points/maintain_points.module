@@ -229,16 +229,9 @@ function maintain_points_form_submit($form, &$form_state) {
   }
 }
 
-function maintain_points_form_alter(&$form, &$form_state, $form_id) {
+/**function maintain_points_form_alter(&$form, &$form_state, $form_id) {
   if ($form_id == 'question_node_form') {
     //TODO: use auto title module.
-    $form['title'] = array(
-        '#type' => 'textarea',
-        '#rows' => 2,
-        '#title' => 'Question',
-        '#required' => TRUE,
-    );
-
     $categories = get_all_category_points();
     $form['field_select_category'] = array(
         '#title' => t('Select Category'),
@@ -253,7 +246,7 @@ function maintain_points_form_alter(&$form, &$form_state, $form_id) {
     unset($form['field_notify_p']);
     return $form;
   }
-}
+}**/
 
 function get_all_category_points() {
   $select_category = db_select('categories', 'c')

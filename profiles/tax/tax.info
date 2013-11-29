@@ -46,7 +46,7 @@ dependencies[] = userpoints_rules
 dependencies[] = views
 dependencies[] = views_ui
 dependencies[] = fe_profile
-
+dependencies[] = auto_nodetitle
 
 
 ; custom modules
