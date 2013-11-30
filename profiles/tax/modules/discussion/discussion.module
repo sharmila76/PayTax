@@ -19,8 +19,8 @@ function discussion_menu() {
       'title' => 'Questions',
       'page callback' => 'drupal_get_form',
       'page arguments' => array('maintain_viewed_questions'),
-      'access callback' => TRUE
-          //'expanded' => TRUE,
+      'access arguments' => array('check customer role')
+          
   );
   return $items;
 }
@@ -34,6 +34,10 @@ function discussion_permission() {
       'consultant content' => array(
           'title' => t('view the allocated questions'),
           'description' => t('Consultant view the allocated questions')
+      ),
+      'check customer role' =>array(
+          'title'=>t('get recently added questions'),
+          'description' =>t('Customer view an answered questions')
       )
   );
 }
@@ -52,6 +56,7 @@ function question_assign_form($form, &$form_state) {
 
   $header = array(
       'question' => array('data' => t('Questions'), 'field' => 'n.title'),
+      'posted_date' => array('data' => t('Posted Date'), 'field' => 'n.title'),
   );
   $form['questions'] = array(
       '#type' => 'tableselect',
@@ -105,7 +110,7 @@ function _get_consultant() {
 
 function _get_all_questions() {
   $questions = db_select('node', 'n')
-          ->fields('n', array('nid', 'title', 'type'))
+          ->fields('n', array('nid', 'title', 'type', 'created'))
           ->condition('type', 'question')
           ->execute();
 
@@ -124,6 +129,7 @@ function _get_all_questions() {
   if (!empty($qids)) {
     foreach ($questions as $question) {
       $nid = $question->nid;
+      $date = format_date($question->created, $type = 'long');
       // $qid=reset($qids);
       if (!empty($qids)) {
         if (array_search($nid, $qids)) {
@@ -136,12 +142,24 @@ function _get_all_questions() {
                       '#href' => 'node/' . $question->nid
                   ),
               ),
+                  'posted_date' => array(
+                  'data' => array(
+                      '#type' => 'link',
+                      '#title' => $date,
+                      '#href' => 'node/' . $question->nid
+                  ),
+              ),
           );
         }
       }
     }
   } else {
     foreach ($questions as $question) {
+      // $posted_date = $question->created;
+      // $date = format_date($question->created, $type = 'medium');
+      //$date1 = format_date($question->created, $type = 'short');
+      $date = format_date($question->created, $type = 'long');
+      // $converted = date('d M Y h.i.s A', strtotime($posted_date));
       $all_question[$question->nid] = array('question' => array(
               'data' => array(
                   '#type' => 'link',
@@ -149,6 +167,13 @@ function _get_all_questions() {
                   '#href' => 'node/' . $question->nid
               ),
           ),
+          'posted_date' => array(
+              'data' => array(
+                  '#type' => 'link',
+                  '#title' => $date,
+                  '#href' => 'node/' . $question->nid
+              ),
+          )
       );
     }
   }
@@ -160,6 +185,7 @@ function _get_all_questions() {
 function view_an_assigned_questions_form($form, &$formstate) {
   $header = array(
       'question' => array('data' => t('Questions'), 'field' => 'n.title'),
+      'posted_date' => array('data' => t('Posted Date'), 'field' => 'n.title'),
   );
   $form = array();
   $form['questions'] = array(
@@ -182,30 +208,41 @@ function _assign_questions_to_particular_consultant() {
     $question_id = $uid_qid->qid;
     if ($user->uid == $uid_qid->uid) {
       $node = node_load($question_id);
+      $date = format_date($node->created, $type = 'long');
       $answer_count = $node->field_answer_count['und'][0]['count'];
-      if(!empty($answer_count)){
-         $title[$node->nid] = array('question' => array(
-              'data' => array(
-                  '#type' => 'link',
-                  '#title' => $node->title,
-                  '#href' => 'node/' . $node->nid
-              ),
-          ),
-      );
-        
+      if (!empty($answer_count)) {
+        $title[$node->nid] = array('question' => array(
+                'data' => array(
+                    '#type' => 'link',
+                    '#title' => $node->title,
+                    '#href' => 'node/' . $node->nid
+                ),
+            ),
+            'posted_date' => array(
+                'data' => array(
+                    '#type' => 'link',
+                    '#title' => $date,
+                    '#href' => 'node/' . $node->nid
+                ),
+            ),
+        );
+      } else {
+        $title[$node->nid] = array('question' => array(
+                'data' => array(
+                    '#type' => 'link',
+                    '#title' => $node->title . '"New"',
+                    '#href' => 'node/' . $node->nid
+                ),
+            ),
+            'posted_date' => array(
+                'data' => array(
+                    '#type' => 'link',
+                    '#title' => $date,
+                    '#href' => 'node/' . $node->nid
+                ),
+            ),
+        );
       }
-      else{
-         $title[$node->nid] = array('question' => array(
-              'data' => array(
-                  '#type' => 'link',
-                  '#title' => $node->title .'"New"',
-                  '#href' => 'node/' . $node->nid
-              ),
-          ),
-      );
-      }
-      
-     
     }
   }
   return $title;
@@ -213,7 +250,8 @@ function _assign_questions_to_particular_consultant() {
 
 function maintain_viewed_questions($form, &$form_state) {
   $header = array(
-      'all_question' => array('data' => t('Questions')),
+      'question' => array('data' => t('Questions'), 'field' => 'n.title'),
+      'posted_date' => array('data' => t('Posted Date'), 'field' => 'n.title'),
   );
 
   $form['questions_answers'] = array(
@@ -237,6 +275,7 @@ function check_questions_viewed_or_not() {
   foreach ($questions as $question) {
     $question_nid = $question->nid;
     $question_node = node_load($question_nid);
+    $date = format_date($question_node->created, $type = 'long');
     $q_created_user = $question_node->uid;
     $answer_count = $question_node->field_answer_count['und'][0]['count'];
     if (!empty($answer_count) && ($q_created_user == $user->uid )) {
@@ -264,12 +303,26 @@ function check_questions_viewed_or_not() {
                         '#href' => 'node/' . $question->nid
                     ),
                 ),
+                'posted_date' => array(
+                    'data' => array(
+                        '#type' => 'link',
+                        '#title' => $date,
+                        '#href' => 'node/' . $question->nid
+                    ),
+                ),
             );
           } else {
             $title[$question_node->nid] = array('all_question' => array(
                     'data' => array(
                         '#type' => 'link',
-                        '#title' => $question->title . '"new"',
+                        '#title' => $question->title . '<div class ="new">' . "new" . '</div>',
+                        '#href' => 'node/' . $question->nid
+                    ),
+                ),
+                'posted_date' => array(
+                    'data' => array(
+                        '#type' => 'link',
+                        '#title' => $date,
                         '#href' => 'node/' . $question->nid
                     ),
                 ),
@@ -282,6 +335,13 @@ function check_questions_viewed_or_not() {
               'data' => array(
                   '#type' => 'link',
                   '#title' => $question->title,
+                  '#href' => 'node/' . $question->nid
+              ),
+          ),
+          'posted_date' => array(
+              'data' => array(
+                  '#type' => 'link',
+                  '#title' => $date,
                   '#href' => 'node/' . $question->nid
               ),
           ),
