@@ -182,7 +182,9 @@ function _assign_questions_to_particular_consultant() {
     $question_id = $uid_qid->qid;
     if ($user->uid == $uid_qid->uid) {
       $node = node_load($question_id);
-      $title[$node->nid] = array('question' => array(
+      $answer_count = $node->field_answer_count['und'][0]['count'];
+      if(!empty($answer_count)){
+         $title[$node->nid] = array('question' => array(
               'data' => array(
                   '#type' => 'link',
                   '#title' => $node->title,
@@ -190,6 +192,20 @@ function _assign_questions_to_particular_consultant() {
               ),
           ),
       );
+        
+      }
+      else{
+         $title[$node->nid] = array('question' => array(
+              'data' => array(
+                  '#type' => 'link',
+                  '#title' => $node->title .'"New"',
+                  '#href' => 'node/' . $node->nid
+              ),
+          ),
+      );
+      }
+      
+     
     }
   }
   return $title;
@@ -227,8 +243,9 @@ function check_questions_viewed_or_not() {
   foreach ($questions as $question) {
     $question_nid = $question->nid;
     $question_node = node_load($question_nid);
+    $q_created_user = $question_node->uid;
     $answer_count = $question_node->field_answer_count['und'][0]['count'];
-    if (!empty($answer_count)) {
+    if (!empty($answer_count) && ($q_created_user == $user->uid )) {
       $answers = db_select('node', 'n')
               ->fields('n', array('nid', 'title', 'type'))
               ->condition('type', 'answer')
@@ -240,41 +257,37 @@ function check_questions_viewed_or_not() {
         if ($qid == $question_nid) {
           $viewed_answer = db_select('node_view_count', 'n')
                   ->fields('n', array('uid', 'nid'))
-                  ->condition('uid',$user->uid,'=')
-                  ->condition('nid',$answer_nid,'=')
+                  ->condition('uid', $user->uid, '=')
+                  ->condition('nid', $answer_nid, '=')
                   ->execute()
                   ->fetchAssoc();
           $viewed_answer_nid = $viewed_answer['nid'];
-            if ($answer_nid == $viewed_answer_nid) {
-              $title[$question_node->nid] = array('all_question' => array(
-                      'data' => array(
-                          '#type' => 'link',
-                          '#title' => $question->title,
-                          '#href' => 'node/' . $question->nid
-                      ),
-                  ),
-              );
-            }
-            else{
-              $title[$question_node->nid] = array('all_question' => array(
-                      'data' => array(
-                          '#type' => 'link',
-                          '#title' => $question->title . '"new"',
-                          '#href' => 'node/' . $question->nid
-                      ),
-                  ),
-              );
-              
-              
-            }
+          if ($answer_nid == $viewed_answer_nid) {
+            $title[$question_node->nid] = array('all_question' => array(
+                    'data' => array(
+                        '#type' => 'link',
+                        '#title' => $question->title,
+                        '#href' => 'node/' . $question->nid
+                    ),
+                ),
+            );
+          } else {
+            $title[$question_node->nid] = array('all_question' => array(
+                    'data' => array(
+                        '#type' => 'link',
+                        '#title' => $question->title .'<div class ="new">'. "new".'</div>',
+                        '#href' => 'node/' . $question->nid
+                    ),
+                ),
+            );
           }
         }
-      
+      }
     } else {
       $title[$question_node->nid] = array('all_question' => array(
               'data' => array(
                   '#type' => 'link',
-                  '#title' => $question->title ,
+                  '#title' => $question->title,
                   '#href' => 'node/' . $question->nid
               ),
           ),
