@@ -233,19 +233,9 @@ function maintain_points_form_submit($form, &$form_state) {
 function maintain_points_form_alter(&$form, &$form_state, $form_id) {
   if ($form_id == 'question_node_form') {
     $categories = get_all_category_points();
-    // Get the field info
-    $info = field_info_field('field_select_category');
-    if (!empty($info)) {
-      // Get a reference to the values
-      $values = &$info['settings']['allowed_values'];
-      // Manipulate the values in some way, e.g.
-      $values = $categories;
-      // Save the field
-      field_update_field($info);
-    }
     drupal_add_js(array('maintain_points' => array('categories_list' => array(json_encode($categories)))), 'setting');
-    //$form['actions']['submit']['#submit'][] = 'maintain_points_submit_callback_function';
-    //$form['#validate'][] = 'maintain_points_validate_function';
+    $form['actions']['submit']['#submit'][] = 'maintain_points_submit_callback_function';
+    $form['#validate'][] = 'maintain_points_validate_function';
     unset($form['actions']['preview']);
     unset($form['field_notify_p']);
     return $form;
@@ -262,5 +252,45 @@ function get_all_category_points() {
       $cat_points[$value->category . '-' . $value->points] = $value->category;
     }
     return $cat_points;
+  }
+}
+
+function maintain_points_validate_function(&$form, &$form_state) {
+  $value = $form_state['values']['field_select_category']['und'][0]['value'];
+  global $user;
+  if (in_array('customer', $user->roles)) {
+    $cat_value = explode('-', $value);
+    //select userpoints
+    $userpoints = db_select('userpoints', 'u')
+            ->fields('u', array('points'))
+            ->condition('uid', $user->uid, '=')
+            ->execute()
+            ->fetchAssoc();
+    if ($cat_value[1] > $userpoints['points']) {
+      form_set_error('field_select_category', 'You don\'t have sufficient points');
+    }
+  }
+}
+
+function maintain_points_submit_callback_function($form, &$form_state) {
+  global $user;
+  if (in_array('customer', $user->roles)) {
+    $value = $form_state['values']['field_select_category']['und'][0]['value'];
+    $cat_value = explode('-', $value);
+    //select userpoints
+    $userpoints = db_select('userpoints', 'u')
+            ->fields('u', array('points'))
+            ->condition('uid', $user->uid, '=')
+            ->execute()
+            ->fetchAssoc();
+    if ($cat_value[1] <= $userpoints['points']) {
+      $reduce_points = $userpoints['points'] - $cat_value[1];
+      db_update('userpoints')
+              ->fields(array(
+                  'points' => $reduce_points,
+              ))
+              ->condition('uid', $user->uid, '=')
+              ->execute();
+    }
   }
 }

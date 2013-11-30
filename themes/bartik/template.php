@@ -155,3 +155,12 @@ function bartik_field__taxonomy_term_reference($variables) {
   return $output;
 }
 
+function bartik_preprocess_page(&$vars) {
+  $categories = get_all_category_points();    
+    $info = field_info_field('field_select_category');
+    if (!empty($info)) {      
+      $values = &$info['settings']['allowed_values'];
+      $values = $categories;
+      field_update_field($info);
+    }
+}
