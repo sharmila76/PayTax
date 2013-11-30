@@ -275,7 +275,7 @@ function check_questions_viewed_or_not() {
             $title[$question_node->nid] = array('all_question' => array(
                     'data' => array(
                         '#type' => 'link',
-                        '#title' => $question->title .'<div class ="new">'. "new".'</div>',
+                        '#title' => $question->title . '"new"',
                         '#href' => 'node/' . $question->nid
                     ),
                 ),
