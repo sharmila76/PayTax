@@ -1648,3 +1648,11 @@ div.admin-panel .description {
 #footer-wrapper .poll .bar .foreground {
   background-color: #ddd;
 }
+/** hide question's page-title **/
+.node-type-question #page-title{
+  display:none;
+}
+/** hide an answer's title **/
+.node-answer h2{
+  display: none;
+}
