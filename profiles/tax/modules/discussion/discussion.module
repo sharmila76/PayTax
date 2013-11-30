@@ -16,7 +16,7 @@ function discussion_menu() {
   );
 
   $items['maintain/viewed/node'] = array(
-      'title' => 'questions',
+      'title' => 'Questions',
       'page callback' => 'drupal_get_form',
       'page arguments' => array('maintain_viewed_questions'),
       'access callback' => TRUE
@@ -212,12 +212,6 @@ function _assign_questions_to_particular_consultant() {
 }
 
 function maintain_viewed_questions($form, &$form_state) {
-  $form['categories_fieldset'] = array(
-      '#type' => 'fieldset',
-      '#prefix' => '<table>',
-      '#suffix' => '</table>',
-      '#tree' => TRUE,
-  );
   $header = array(
       'all_question' => array('data' => t('Questions')),
   );
