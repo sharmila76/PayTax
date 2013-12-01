@@ -136,17 +136,27 @@ function update_categories_and_points($form, &$form_state) {
   $categories = get_category();
   $points = get_points();
   for ($i = 0; $i < $num_of_categories; $i++) {
-    if ($categories[$i] != $form_state['values']['categories_fieldset']['row_' . $i]['categories'] || ($points[$i] != $form_state['values']['categories_fieldset']['row_' . $i]['points'])) {
+    if ($categories[$i] != $form_state['values']['categories_fieldset']['row_' . $i]['categories']) {
       db_update('categories')
               ->fields(array(
                   'category' => $form_state['values']['categories_fieldset']['row_' . $i]['categories'],
+                      //'points' => $form_state['values']['categories_fieldset']['row_' . $i]['points']
+              ))
+              ->condition('id', $i + 1, '=')
+              ->execute();
+      drupal_set_message("updated" . ' ' . "category" . ' ' . $form_state['values']['categories_fieldset']['row_' . $i]['categories']);
+    } elseif (($points[$i] != $form_state['values']['categories_fieldset']['row_' . $i]['points'])) {
+      db_update('categories')
+              ->fields(array(
+                  //'category' => $form_state['values']['categories_fieldset']['row_' . $i]['categories'],
                   'points' => $form_state['values']['categories_fieldset']['row_' . $i]['points']
               ))
               ->condition('id', $i + 1, '=')
               ->execute();
+      drupal_set_message("updated" . ' ' . "Point" . ' ' . $form_state['values']['categories_fieldset']['row_' . $i]['points']);
     }
   }
-  drupal_set_message('updated successfully');
+  // drupal_set_message('updated successfully');
 }
 
 function get_category() {
@@ -227,6 +237,7 @@ function maintain_points_form_submit($form, &$form_state) {
                 'points' => $form_state['values']['names_fieldset']['categories'][$i]['point'],
             ))
             ->execute();
+    drupal_set_message('saved' . ' ' . 'category' . ' ' . $form_state['values']['names_fieldset']['categories'][$i]['category'] . ' ' . 'points' . ' ' . $form_state['values']['names_fieldset']['categories'][$i]['point']);
   }
 }
 
