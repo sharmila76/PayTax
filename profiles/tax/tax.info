@@ -47,6 +47,7 @@ dependencies[] = views
 dependencies[] = views_ui
 dependencies[] = fe_profile
 dependencies[] = auto_nodetitle
+dependencies[] = node_view_count
 
 
 ; custom modules
