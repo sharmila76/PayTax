@@ -33,7 +33,6 @@ features[field_base][] = field_question
 features[field_base][] = field_question_locked_p
 features[field_base][] = field_select_category
 features[field_base][] = field_upload_document
-features[field_instance][] = node-answer-body
 features[field_instance][] = node-answer-field_answer
 features[field_instance][] = node-answer-field_answer_question
 features[field_instance][] = node-question-field_answer_count

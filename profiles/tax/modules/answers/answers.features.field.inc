@@ -223,10 +223,7 @@ function answers_field_default_field_bases() {
     'module' => 'list',
     'settings' => array(
       'allowed_values' => array(
-        'Home loan-2' => 'Home loan',
-        'Jewel loan-4' => 'Jewel loan',
-        'Education loan-6' => 'Education loan',
-        'Human loan-8' => 'Human loan',
+        'EEE-25' => 'EEE',
       ),
       'allowed_values_function' => '',
       'allowed_values_php' => '',
@@ -282,52 +279,6 @@ function answers_field_default_field_bases() {
 function answers_field_default_field_instances() {
   $field_instances = array();
 
-  // Exported field_instance: 'node-answer-body'
-  $field_instances['node-answer-body'] = array(
-    'bundle' => 'answer',
-    'default_value' => NULL,
-    'deleted' => 0,
-    'description' => '',
-    'display' => array(
-      'default' => array(
-        'label' => 'hidden',
-        'module' => 'text',
-        'settings' => array(),
-        'type' => 'text_default',
-        'weight' => 1,
-      ),
-      'teaser' => array(
-        'label' => 'hidden',
-        'module' => 'text',
-        'settings' => array(
-          'trim_length' => 600,
-        ),
-        'type' => 'text_summary_or_trimmed',
-        'weight' => 0,
-      ),
-    ),
-    'entity_type' => 'node',
-    'field_name' => 'body',
-    'label' => 'Description',
-    'required' => 0,
-    'settings' => array(
-      'display_summary' => 1,
-      'text_processing' => 1,
-      'user_register_form' => FALSE,
-    ),
-    'widget' => array(
-      'active' => 1,
-      'module' => 'text',
-      'settings' => array(
-        'rows' => 20,
-        'summary_rows' => 5,
-      ),
-      'type' => 'text_textarea_with_summary',
-      'weight' => 3,
-    ),
-    'widget_type' => 'text_textarea_with_summary',
-  );
-
   // Exported field_instance: 'node-answer-field_answer'
   $field_instances['node-answer-field_answer'] = array(
     'bundle' => 'answer',
@@ -352,7 +303,7 @@ function answers_field_default_field_instances() {
     'entity_type' => 'node',
     'field_name' => 'field_answer',
     'label' => 'Answer',
-    'required' => 0,
+    'required' => 1,
     'settings' => array(
       'text_processing' => 0,
       'user_register_form' => FALSE,
@@ -518,7 +469,7 @@ function answers_field_default_field_instances() {
     'entity_type' => 'node',
     'field_name' => 'field_question',
     'label' => 'Question',
-    'required' => 0,
+    'required' => 1,
     'settings' => array(
       'text_processing' => 0,
       'user_register_form' => FALSE,
@@ -651,7 +602,6 @@ function answers_field_default_field_instances() {
   t('Answer Count');
   t('Answer to the question');
   t('Category for the question');
-  t('Description');
   t('Notify on Answer');
   t('Question');
   t('Question Locked');
