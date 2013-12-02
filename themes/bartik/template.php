@@ -161,11 +161,9 @@ function bartik_field__taxonomy_term_reference($variables) {
 function bartik_preprocess_page(&$vars) {
   if(current_path() != 'maintain_points') {
     $categories = get_all_category_points();    
-    $info = field_info_field('field_select_category');
-    if (!empty($info)) {      
-      $values = &$info['settings']['allowed_values'];
-      $values = $categories;
-      field_update_field($info);
-    }
+    $info = field_info_field('field_select_category');         
+    $values = &$info['settings']['allowed_values'];
+    $values = $categories;
+    field_update_field($info);
   }  
 }
