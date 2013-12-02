@@ -112,6 +112,9 @@ function bartik_preprocess_node(&$variables) {
   if ($variables['view_mode'] == 'full' && node_is_page($variables['node'])) {
     $variables['classes_array'][] = 'node-full';
   }
+  if ($variables['type'] == 'question') {
+    //$variables['answer_form'] = drupal_get_form('answer_node_form');
+  }
 }
 
 /**
@@ -156,11 +159,13 @@ function bartik_field__taxonomy_term_reference($variables) {
 }
 
 function bartik_preprocess_page(&$vars) {
-  $categories = get_all_category_points();    
+  if(current_path() != 'maintain_points') {
+    $categories = get_all_category_points();    
     $info = field_info_field('field_select_category');
     if (!empty($info)) {      
       $values = &$info['settings']['allowed_values'];
       $values = $categories;
       field_update_field($info);
     }
+  }  
 }
