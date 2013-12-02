@@ -230,7 +230,10 @@ function _assign_questions_to_particular_consultant() {
         $title[$node->nid] = array('question' => array(
                 'data' => array(
                     '#type' => 'link',
-                    '#title' => $node->title . '"New"',
+                    '#title' => $node->title,
+                    '#markup' => '<p>Some text</p>',
+                    '#suffix'=>'</div id ="new_calss"> New </div>',
+                    
                     '#href' => 'node/' . $node->nid
                 ),
             ),
@@ -315,7 +318,9 @@ function check_questions_viewed_or_not() {
             $title[$question_node->nid] = array('all_question' => array(
                     'data' => array(
                         '#type' => 'link',
-                        '#title' => $question->title . '<div class ="new">' . "new" . '</div>',
+                        '#title' => $question->title,
+                        '#markup' => '<p>Some text</p>',
+                        '#suffix'=>'</div id ="new_calss"> New </div>',
                         '#href' => 'node/' . $question->nid
                     ),
                 ),
