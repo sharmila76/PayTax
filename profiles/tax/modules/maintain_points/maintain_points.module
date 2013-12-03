@@ -11,6 +11,13 @@ function maintain_points_menu() {
       'access arguments' => array('maintain_points_form_admin_access'),
           //'expanded' => TRUE,
   );
+  $items['post_question'] = array(
+      'title' => 'Post your question',
+      'page callback' => 'drupal_get_form',
+      'page arguments' => array('maintain_points_post_question_form'),
+      'access arguments' => array('maintain_points_form_admin_access'),
+          //'expanded' => TRUE,
+  );
   return $items;
 }
 
@@ -241,16 +248,67 @@ function maintain_points_form_submit($form, &$form_state) {
   }
 }
 
-function maintain_points_form_alter(&$form, &$form_state, $form_id) {
-  if ($form_id == 'question_node_form') {
-    $categories = get_all_category_points();
-    drupal_add_js(array('maintain_points' => array('categories_list' => array(json_encode($categories)))), 'setting');
-    $form['actions']['submit']['#submit'][] = 'maintain_points_submit_callback_function';
-    $form['#validate'][] = 'maintain_points_validate_function';
-    unset($form['actions']['preview']);
-    unset($form['field_notify_p']);
-    return $form;
+function maintain_points_post_question_form($form, &$form_state) {
+  $form['title'] = array(
+      '#type' => 'textfield',
+      '#title' => t('Question'),
+      '#required' => TRUE,
+  );
+  $categories = get_all_category_points();
+  $form['field_select_category_name'] = array(
+      '#type' => 'select',
+      '#title' => t('Select'),
+      '#options' => $categories,
+      '#required' => TRUE,
+  );
+  $form['file'] = array(
+      '#type' => 'managed_file',
+      '#title' => t('Upload a document'),
+      '#description' => t('Allowed extensions: jpg, jpeg, png, gif'),
+      '#cardinality' => FIELD_CARDINALITY_UNLIMITED,
+  );
+  $form['submit'] = array(
+      '#type' => 'submit',
+      '#value' => t('Ask Question'),
+  );
+  //drupal_add_js(array('maintain_points' => array('categories_list' => array(json_encode($categories)))), 'setting');
+  return $form;
+}
+
+function maintain_points_post_question_form_validate($form, &$form_state) {
+  $file = file_save_upload('file', array(
+      //'file_validate_is_image' => array(), 
+      'file_validate_extensions' => array('png gif jpg jpeg pdf'),
+  ));
+  if ($file) {
+    if ($file = file_move($file, 'public://')) {
+      $form_state['storage']['file'] = $file;
+    } else {
+      form_set_error('file', t('Failed to write the uploaded file to the site\'s file folder.'));
+    }
+  } else {
+    form_set_error('file', t('No file was uploaded.'));
   }
+}
+
+function maintain_points_post_question_form_submit($form, &$form_state) {
+  dpm($form);
+  $node = new stdClass();
+  $node->type = 'question';
+  node_object_prepare($node);
+  $node->title = $form_state['values']['title'];
+  $node->field_notify_p[LANGUAGE_NONE][0]['value'] = 1;
+  $node->field_question[LANGUAGE_NONE][0]['value'] = $form_state['values']['title'];
+  $node->field_select_category_name[LANGUAGE_NONE][0]['value'] = $form_state['values']['field_select_category_name'];
+
+  $file = $form_state['storage']['file'];
+  unset($form_state['storage']['file']);
+  $file->status = FILE_STATUS_PERMANENT;
+  file_save($file);
+
+  $node->field_upload_document[LANGUAGE_NONE][0]['fid'] = $file->fid;
+  $node->field_upload_document[LANGUAGE_NONE][0]['display'] = 1;
+  node_save($node);
 }
 
 function get_all_category_points() {
@@ -266,42 +324,56 @@ function get_all_category_points() {
   }
 }
 
-function maintain_points_validate_function(&$form, &$form_state) {
-  $value = $form_state['values']['field_select_category']['und'][0]['value'];
+/**
+  function maintain_points_validate_function(&$form, &$form_state) {
+  //$value = $form_state['values']['field_select_category']['und'][0]['value'];
   global $user;
   if (in_array('customer', $user->roles)) {
-    $cat_value = explode('-', $value);
-    //select userpoints
-    $userpoints = db_select('userpoints', 'u')
-            ->fields('u', array('points'))
-            ->condition('uid', $user->uid, '=')
-            ->execute()
-            ->fetchAssoc();
-    if ($cat_value[1] > $userpoints['points']) {
-      form_set_error('field_select_category', 'You don\'t have sufficient points');
-    }
+  $cat_value = explode('-', $value);
+  //select userpoints
+  $userpoints = db_select('userpoints', 'u')
+  ->fields('u', array('points'))
+  ->condition('uid', $user->uid, '=')
+  ->execute()
+  ->fetchAssoc();
+  if ($cat_value[1] > $userpoints['points']) {
+  form_set_error('field_select_category', 'You don\'t have sufficient points');
   }
-}
-
+  }
+  }
+ */
 function maintain_points_submit_callback_function($form, &$form_state) {
-  global $user;
-  if (in_array('customer', $user->roles)) {
-    $value = $form_state['values']['field_select_category']['und'][0]['value'];
+  // get the node object 
+  $nid = $form['nid']['#value'];
+  $node = node_load($nid);
+  dpm($form);
+// create the helper object 
+  //$obj = entity_metadata_wrapper('question', $node);
+  //dpm($node);
+// add the field data
+  //$obj->field_1 = $form_state['values']['field_1'];
+  //$obj->field_2 = $form_state['values']['field_2'];
+// save the data
+  //$obj->save();
+  /**
+    global $user;
+    if (in_array('customer', $user->roles)) {
+    //$value = $form_state['values']['field_select_category']['und'][0]['value'];
     $cat_value = explode('-', $value);
     //select userpoints
     $userpoints = db_select('userpoints', 'u')
-            ->fields('u', array('points'))
-            ->condition('uid', $user->uid, '=')
-            ->execute()
-            ->fetchAssoc();
+    ->fields('u', array('points'))
+    ->condition('uid', $user->uid, '=')
+    ->execute()
+    ->fetchAssoc();
     if ($cat_value[1] <= $userpoints['points']) {
-      $reduce_points = $userpoints['points'] - $cat_value[1];
-      db_update('userpoints')
-              ->fields(array(
-                  'points' => $reduce_points,
-              ))
-              ->condition('uid', $user->uid, '=')
-              ->execute();
+    $reduce_points = $userpoints['points'] - $cat_value[1];
+    db_update('userpoints')
+    ->fields(array(
+    'points' => $reduce_points,
+    ))
+    ->condition('uid', $user->uid, '=')
+    ->execute();
     }
-  }
+    } */
 }
