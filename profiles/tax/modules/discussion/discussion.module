@@ -20,7 +20,6 @@ function discussion_menu() {
       'page callback' => 'drupal_get_form',
       'page arguments' => array('maintain_viewed_questions'),
       'access arguments' => array('check customer role')
-          
   );
   return $items;
 }
@@ -35,9 +34,9 @@ function discussion_permission() {
           'title' => t('view the allocated questions'),
           'description' => t('Consultant view the allocated questions')
       ),
-      'check customer role' =>array(
-          'title'=>t('get recently added questions'),
-          'description' =>t('Customer view an answered questions')
+      'check customer role' => array(
+          'title' => t('get recently added questions'),
+          'description' => t('Customer view an answered questions')
       )
   );
 }
@@ -50,18 +49,22 @@ function question_assign_form($form, &$form_state) {
       '#type' => 'select',
       '#title' => t('Consultant'),
       '#required' => TRUE,
-      '#description' => t('display all consultant'),
+      '#description' => t('Display all consultant'),
       '#options' => _get_consultant(),
   );
 
   $header = array(
       'question' => array('data' => t('Questions'), 'field' => 'n.title'),
-      'posted_date' => array('data' => t('Posted Date'), 'field' => 'n.title'),
+      'posted_date' => array('data' => t('Posted Date'), 'field' => 'n.created'),
   );
   $form['questions'] = array(
       '#type' => 'tableselect',
       '#header' => $header,
       '#options' => _get_all_questions(),
+      '#empty' => t('No questions to assign')
+  );
+  $form['pager'] = array(
+      '#theme' => 'pager',
   );
   $form['submit'] = array(
       '#type' => 'submit',
@@ -96,7 +99,6 @@ function _get_consultant() {
     if (!empty($user)) {
       $uid = $user->uid;
       $tot_user = user_load($uid);
-
       if (!empty($tot_user->roles[3])) {
         $name[$tot_user->uid] = $tot_user->name;
       }
@@ -110,6 +112,9 @@ function _get_consultant() {
 
 function _get_all_questions() {
   $questions = db_select('node', 'n')
+          ->extend('TableSort')
+          ->extend('PagerDefault')
+          ->limit(15)
           ->fields('n', array('nid', 'title', 'type', 'created'))
           ->condition('type', 'question')
           ->execute();
@@ -142,7 +147,7 @@ function _get_all_questions() {
                       '#href' => 'node/' . $question->nid
                   ),
               ),
-                  'posted_date' => array(
+              'posted_date' => array(
                   'data' => array(
                       '#type' => 'link',
                       '#title' => $date,
@@ -173,7 +178,7 @@ function _get_all_questions() {
                   '#title' => $date,
                   '#href' => 'node/' . $question->nid
               ),
-          )
+          ),
       );
     }
   }
@@ -182,19 +187,26 @@ function _get_all_questions() {
   }
 }
 
-function view_an_assigned_questions_form($form, &$formstate) {
+function view_an_assigned_questions_form($form, &$form_state) {
+  global $user;
+  $form = array();
   $header = array(
       'question' => array('data' => t('Questions'), 'field' => 'n.title'),
-      'posted_date' => array('data' => t('Posted Date'), 'field' => 'n.title'),
+      'posted_date' => array('data' => t('Posted Date'), 'field' => 'n.created'),
+      'edit' => array('data' => t('Edit')),
   );
-  $form = array();
   $form['questions'] = array(
       '#theme' => 'table',
+      '#prefix' => '<div id="filtered_questions">',
+      '#suffix' => '</div>',
       '#header' => $header,
       '#rows' => _assign_questions_to_particular_consultant(),
+      '#empty' => t('Router not assigned the questions')
   );
-
-  return $form;
+  $form['pager'] = array(
+      '#theme' => 'pager',
+  );
+ return $form;
 }
 
 function _assign_questions_to_particular_consultant() {
@@ -202,13 +214,16 @@ function _assign_questions_to_particular_consultant() {
   $title = array();
   $uids_qids = db_select('consultant_node', 'u')
           ->fields('u', array('uid', 'qid'))
+          ->extend('TableSort')
+          ->extend('PagerDefault')
+          ->limit(15)
           ->condition('uid', $user->uid, '=')
           ->execute();
   foreach ($uids_qids as $uid_qid) {
     $question_id = $uid_qid->qid;
     if ($user->uid == $uid_qid->uid) {
       $node = node_load($question_id);
-      $date = format_date($node->created, $type = 'long');
+      $date = format_date($node->created, 'custom', 'd-M-o');
       $answer_count = $node->field_answer_count['und'][0]['count'];
       if (!empty($answer_count)) {
         $title[$node->nid] = array('question' => array(
@@ -225,12 +240,20 @@ function _assign_questions_to_particular_consultant() {
                     '#href' => 'node/' . $node->nid
                 ),
             ),
+            'edit' => array(
+                'data' => array(
+                    '#type' => 'link',
+                    '#title' => 'Edit',
+                    '#href' => 'node/' . $node->nid . '/edit'
+                ),
+            ),
         );
       } else {
         $title[$node->nid] = array('question' => array(
                 'data' => array(
                     '#type' => 'link',
-                    '#title' => $node->title.'<div id ="new_class"> New </div>',
+                    '#title' => $node->title,
+                    '#suffix' => '</div id ="new_class"> New </div>',
                     '#href' => 'node/' . $node->nid
                 ),
             ),
@@ -239,6 +262,13 @@ function _assign_questions_to_particular_consultant() {
                     '#type' => 'link',
                     '#title' => $date,
                     '#href' => 'node/' . $node->nid
+                ),
+            ),
+            'edit' => array(
+                'data' => array(
+                    '#type' => 'link',
+                    '#title' => 'Edit',
+                    '#href' => 'node/' . $node->nid . '/edit'
                 ),
             ),
         );
@@ -251,15 +281,16 @@ function _assign_questions_to_particular_consultant() {
 function maintain_viewed_questions($form, &$form_state) {
   $header = array(
       'question' => array('data' => t('Questions'), 'field' => 'n.title'),
-      'posted_date' => array('data' => t('Posted Date'), 'field' => 'n.title'),
+      'posted_date' => array('data' => t('Posted Date'), 'field' => 'n.created'),
   );
-
   $form['questions_answers'] = array(
       '#theme' => 'table',
       '#header' => $header,
       '#rows' => check_questions_viewed_or_not()
   );
-
+  $form['pager'] = array(
+      '#theme' => 'pager',
+  );
 
   return $form;
 }
@@ -269,13 +300,16 @@ function check_questions_viewed_or_not() {
   $title = array();
   $questions = db_select('node', 'n')
           ->fields('n', array('nid', 'title', 'type'))
+          ->extend('TableSort')
+          ->extend('PagerDefault')
+          ->limit(15)
           ->condition('type', 'question')
           ->execute();
   $num_of_questions = $questions->rowCount();
   foreach ($questions as $question) {
     $question_nid = $question->nid;
     $question_node = node_load($question_nid);
-    $date = format_date($question_node->created, $type = 'long');
+    $date = format_date($question_node->created, 'custom', 'd-M-o');
     $q_created_user = $question_node->uid;
     $answer_count = $question_node->field_answer_count['und'][0]['count'];
     if (!empty($answer_count) && ($q_created_user == $user->uid )) {
@@ -315,7 +349,8 @@ function check_questions_viewed_or_not() {
             $title[$question_node->nid] = array('all_question' => array(
                     'data' => array(
                         '#type' => 'link',
-                        '#title' => $question->title.'<div id ="new_class"> New </div>',
+                        '#title' => $question->title,
+                        '#suffix' => '</div id ="new_class"> New </div>',
                         '#href' => 'node/' . $question->nid
                     ),
                 ),
@@ -351,3 +386,10 @@ function check_questions_viewed_or_not() {
 
   return $title;
 }
+
+function _get_all_month() {
+  return array(
+      '0' => '--Select--', '1' => 'January', '2' => 'February', '3' => 'March', '4' => 'April', '5' => 'May', '6' => 'June', '7' => 'July', '8' => 'August', '9' => 'September', '10' => 'October', '11' => 'November', '12' => 'December'
+  );
+}
+
