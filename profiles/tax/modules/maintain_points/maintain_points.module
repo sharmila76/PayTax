@@ -15,7 +15,7 @@ function maintain_points_menu() {
       'title' => 'Post your question',
       'page callback' => 'drupal_get_form',
       'page arguments' => array('maintain_points_post_question_form'),
-      'access arguments' => array('maintain_points_form_admin_access'),
+      'access arguments' => array('maintain_points_post_question_customer_access'),
           //'expanded' => TRUE,
   );
   return $items;
@@ -30,6 +30,10 @@ function maintain_points_permission() {
       'maintain_points_form_admin_access' => array(
           'title' => 'maintain_points_access_permission',
           'description' => 'Admin can only view this maintain_points'
+      ),
+      'maintain_points_post_question_customer_access' => array(
+          'title' => 'Maintain points post question',
+          'description' => 'Customer only can able to post question'
       ),
   );
 }
@@ -257,58 +261,28 @@ function maintain_points_post_question_form($form, &$form_state) {
   $categories = get_all_category_points();
   $form['field_select_category_name'] = array(
       '#type' => 'select',
-      '#title' => t('Select'),
+      '#title' => t('Select category'),
+      '#description' => t('Category for the question'),
       '#options' => $categories,
       '#required' => TRUE,
   );
-  $form['file'] = array(
-      '#type' => 'managed_file',
-      '#title' => t('Upload a document'),
-      '#description' => t('Allowed extensions: jpg, jpeg, png, gif'),
-      '#cardinality' => FIELD_CARDINALITY_UNLIMITED,
+  $form['plup'] = array(
+      '#type' => 'plupload',
+      '#title' => t('Upload files'),
+      '#upload_validators' => array(
+          'file_validate_extensions' => array('jpg jpeg gif png pdf'),
+      ),
+      '#plupload_settings' => array(
+          'runtimes' => 'html5',
+          'chunk_size' => '1mb',
+      ),
   );
   $form['submit'] = array(
       '#type' => 'submit',
       '#value' => t('Ask Question'),
   );
-  //drupal_add_js(array('maintain_points' => array('categories_list' => array(json_encode($categories)))), 'setting');
+  drupal_add_js(array('maintain_points' => array('categories_list' => array(json_encode($categories)))), 'setting');
   return $form;
-}
-
-function maintain_points_post_question_form_validate($form, &$form_state) {
-  $file = file_save_upload('file', array(
-      //'file_validate_is_image' => array(), 
-      'file_validate_extensions' => array('png gif jpg jpeg pdf'),
-  ));
-  if ($file) {
-    if ($file = file_move($file, 'public://')) {
-      $form_state['storage']['file'] = $file;
-    } else {
-      form_set_error('file', t('Failed to write the uploaded file to the site\'s file folder.'));
-    }
-  } else {
-    form_set_error('file', t('No file was uploaded.'));
-  }
-}
-
-function maintain_points_post_question_form_submit($form, &$form_state) {
-  dpm($form);
-  $node = new stdClass();
-  $node->type = 'question';
-  node_object_prepare($node);
-  $node->title = $form_state['values']['title'];
-  $node->field_notify_p[LANGUAGE_NONE][0]['value'] = 1;
-  $node->field_question[LANGUAGE_NONE][0]['value'] = $form_state['values']['title'];
-  $node->field_select_category_name[LANGUAGE_NONE][0]['value'] = $form_state['values']['field_select_category_name'];
-
-  $file = $form_state['storage']['file'];
-  unset($form_state['storage']['file']);
-  $file->status = FILE_STATUS_PERMANENT;
-  file_save($file);
-
-  $node->field_upload_document[LANGUAGE_NONE][0]['fid'] = $file->fid;
-  $node->field_upload_document[LANGUAGE_NONE][0]['display'] = 1;
-  node_save($node);
 }
 
 function get_all_category_points() {
@@ -322,58 +296,98 @@ function get_all_category_points() {
     }
     return $cat_points;
   }
+  else {
+    return array();
+  }
 }
 
-/**
-  function maintain_points_validate_function(&$form, &$form_state) {
-  //$value = $form_state['values']['field_select_category']['und'][0]['value'];
+function maintain_points_post_question_form_validate($form, &$form_state) {
+  $value = $form_state['values']['field_select_category_name'];
   global $user;
   if (in_array('customer', $user->roles)) {
-  $cat_value = explode('-', $value);
-  //select userpoints
-  $userpoints = db_select('userpoints', 'u')
-  ->fields('u', array('points'))
-  ->condition('uid', $user->uid, '=')
-  ->execute()
-  ->fetchAssoc();
-  if ($cat_value[1] > $userpoints['points']) {
-  form_set_error('field_select_category', 'You don\'t have sufficient points');
-  }
-  }
-  }
- */
-function maintain_points_submit_callback_function($form, &$form_state) {
-  // get the node object 
-  $nid = $form['nid']['#value'];
-  $node = node_load($nid);
-  dpm($form);
-// create the helper object 
-  //$obj = entity_metadata_wrapper('question', $node);
-  //dpm($node);
-// add the field data
-  //$obj->field_1 = $form_state['values']['field_1'];
-  //$obj->field_2 = $form_state['values']['field_2'];
-// save the data
-  //$obj->save();
-  /**
-    global $user;
-    if (in_array('customer', $user->roles)) {
-    //$value = $form_state['values']['field_select_category']['und'][0]['value'];
     $cat_value = explode('-', $value);
     //select userpoints
     $userpoints = db_select('userpoints', 'u')
-    ->fields('u', array('points'))
-    ->condition('uid', $user->uid, '=')
-    ->execute()
-    ->fetchAssoc();
-    if ($cat_value[1] <= $userpoints['points']) {
-    $reduce_points = $userpoints['points'] - $cat_value[1];
-    db_update('userpoints')
-    ->fields(array(
-    'points' => $reduce_points,
-    ))
-    ->condition('uid', $user->uid, '=')
-    ->execute();
+            ->fields('u', array('points'))
+            ->condition('uid', $user->uid, '=')
+            ->execute()
+            ->fetchAssoc();
+    if ($cat_value[1] > $userpoints['points']) {
+      form_set_error('field_select_category_name', 'You don\'t have sufficient points');
     }
-    } */
+  }
+}
+
+function maintain_points_post_question_form_submit($form, &$form_state) {
+  $node = new stdClass();
+  $node->type = 'question';
+  node_object_prepare($node);
+  $node->title = $form_state['values']['title'];
+  $node->field_notify_p[LANGUAGE_NONE][0]['value'] = 1;
+  $node->field_question[LANGUAGE_NONE][0]['value'] = $form_state['values']['title'];
+  $value = $form_state['values']['field_select_category_name'];
+  $cat_value = explode('-', $value);
+  $node->field_select_category[LANGUAGE_NONE][0]['value'] = $cat_value[0];
+
+  $files = $form_state['values']['plup'];
+  foreach ($files as $file) {
+    $file_name = $file['name'];
+    $ext = pathinfo($file_name, PATHINFO_EXTENSION);
+    $file_obj = file_uri_to_object($file['tmppath']);
+    switch ($ext) {
+      case 'pdf':
+        $node->field_upload_document[LANGUAGE_NONE][] = save_file($file_obj, $file_name);
+        break;
+      case 'jpg':
+        $node->field_upload_document[LANGUAGE_NONE][] = save_file($file_obj, $file_name);
+        break;
+      case 'jpeg':
+        $node->field_upload_document[LANGUAGE_NONE][] = save_file($file_obj, $file_name);
+        break;
+      case 'png':
+        $node->field_upload_document[LANGUAGE_NONE][] = save_file($file_obj, $file_name);
+        break;
+      case 'gif':
+        $node->field_upload_document[LANGUAGE_NONE][] = save_file($file_obj, $file_name);
+        break;
+    }
+  }
+
+  node_save($node);
+
+  global $user;
+  if (in_array('customer', $user->roles)) {
+    $value = $form_state['values']['field_select_category_name'];
+    $cat_value = explode('-', $value);
+    //select userpoints
+    $userpoints = db_select('userpoints', 'u')
+            ->fields('u', array('points'))
+            ->condition('uid', $user->uid, '=')
+            ->execute()
+            ->fetchAssoc();
+    if ($cat_value[1] <= $userpoints['points']) {
+      $reduce_points = $userpoints['points'] - $cat_value[1];
+      db_update('userpoints')
+              ->fields(array(
+                  'points' => $reduce_points,
+              ))
+              ->condition('uid', $user->uid, '=')
+              ->execute();
+    }
+  }
+  
+  if($node->nid) {
+    drupal_set_message('Posted Successfully');
+  }
+}
+
+function save_file($tmppath, $name) {
+  //move file to public dir
+  if ($file = file_move($tmppath, 'public://' . $name)) {
+    $file->display = 1;
+    $file->description = NULL;
+    return (array) $file;
+  } else {
+    form_set_error('intro', t('Failed to write the uploaded file to the site\'s file folder.'));
+  }
 }
