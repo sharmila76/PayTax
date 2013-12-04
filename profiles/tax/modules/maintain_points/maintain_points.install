@@ -5,32 +5,52 @@ function maintain_points_install() {
 }
 
 function maintain_points_schema() {
-   $schema['categories'] = array(
-    'fields' => array(
-      'id' => array(
-        'type' => 'serial',
-        'not null' => TRUE,
-        'description' => "id auto increment.",
-      ),  
-      'uid' => array(
-        'type' => 'int',
-        'unsigned' => TRUE,
-        'not null' => TRUE,
+  $schema['categories'] = array(
+      'fields' => array(
+          'id' => array(
+              'type' => 'serial',
+              'not null' => TRUE,
+              'description' => "id auto increment.",
+          ),
+          'uid' => array(
+              'type' => 'int',
+              'unsigned' => TRUE,
+              'not null' => TRUE,
+          ),
+          'category' => array(
+              'description' => 'Type of the question',
+              'type' => 'varchar',
+              'length' => 255,
+              'not null' => TRUE,
+          ),
+          'points' => array(
+              'description' => 'Give points to the category',
+              'type' => 'int',
+              'unsigned' => TRUE,
+              'not null' => TRUE,
+          ),
+          'created_date' => array(
+              'description' => 'unix timestamp',
+              'type' => 'int',
+              'unsigned' => TRUE,
+              'not null' => TRUE,
+          ),
+          'modified_date' => array(
+              'description' => 'unix timestamp',
+              'type' => 'int',
+              'unsigned' => TRUE,
+              'not null' => TRUE,
+          ),
+          'created_by'=> array(
+              'description' => 'unix timestamp',
+              'type' => 'varchar',
+              'length'=>255,
+              'unsigned' => TRUE,
+              'not null' => TRUE,
+              
+          ),
       ),
-      'category' => array(
-        'description' => 'Type of the question',
-        'type' => 'varchar',
-        'length' => 255,
-        'not null' => TRUE,
-      ),
-      'points' => array(
-        'description' => 'Give points to the category',
-        'type' => 'int',
-        'unsigned' => TRUE,
-        'not null' => TRUE,
-      ),     
-    ), 
-     'primary key' => array('id'),
+      'primary key' => array('id'),
   );
-    return $schema;
+  return $schema;
 }
