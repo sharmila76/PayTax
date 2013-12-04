@@ -109,11 +109,12 @@ function bartik_process_maintenance_page(&$variables) {
  * Override or insert variables into the node template.
  */
 function bartik_preprocess_node(&$variables) {
+  //dpm($variables);
   if ($variables['view_mode'] == 'full' && node_is_page($variables['node'])) {
     $variables['classes_array'][] = 'node-full';
   }
   if ($variables['type'] == 'question') {
-    //$variables['answer_form'] = drupal_get_form('answer_node_form');
+    _question_and_answer($variables);    
   }
 }
 
@@ -156,4 +157,11 @@ function bartik_field__taxonomy_term_reference($variables) {
   $output = '<div class="' . $variables['classes'] . (!in_array('clearfix', $variables['classes_array']) ? ' clearfix' : '') . '"' . $variables['attributes'] .'>' . $output . '</div>';
 
   return $output;
+}
+
+function _question_and_answer(&$variables) {
+  $variables['title'] = $variables['title'];
+  $variables['category'] = $variables['field_select_category'][0]['value'];
+  $variables['answer_form'] = drupal_get_form('maintain_points_post_answer_form');
+  $variables['view'] = views_embed_view('answers_to_a_question', $variables['nid']);
 }
