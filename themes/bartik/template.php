@@ -162,6 +162,7 @@ function bartik_field__taxonomy_term_reference($variables) {
 function _question_and_answer(&$variables) {
   $variables['title'] = $variables['title'];
   $variables['category'] = $variables['field_select_category'][0]['value'];
-  $variables['answer_form'] = drupal_get_form('maintain_points_post_answer_form');
-  $variables['view'] = views_embed_view('answers_to_a_question', $variables['nid']);
+  $variables['file'] = $variables['field_upload_document'];
+  $variables['answer_form'] = drupal_get_form('maintain_points_post_answer_form', $variables['nid']);
+  $variables['view'] = views_embed_view('answers_to_a_question');
 }

@@ -372,7 +372,7 @@ function answers_views_default_views() {
   $handler->display->display_options['fields']['created']['relationship'] = 'field_answer_question_nid';
   $handler->display->display_options['fields']['created']['element_label_colon'] = FALSE;
   $handler->display->display_options['fields']['created']['hide_empty'] = TRUE;
-  $handler->display->display_options['fields']['created']['date_format'] = 'time ago';
+  $handler->display->display_options['fields']['created']['date_format'] = 'long';
   /* Field: Content: Answer Count */
   $handler->display->display_options['fields']['field_answer_count']['id'] = 'field_answer_count';
   $handler->display->display_options['fields']['field_answer_count']['table'] = 'field_data_field_answer_count';

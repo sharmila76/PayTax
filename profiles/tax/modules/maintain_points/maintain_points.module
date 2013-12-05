@@ -9,21 +9,18 @@ function maintain_points_menu() {
       'page callback' => 'drupal_get_form',
       'page arguments' => array('maintain_points_form'),
       'access arguments' => array('maintain_points_form_admin_access'),
-          //'expanded' => TRUE,
   );
   $items['post_question'] = array(
       'title' => 'Post your question',
       'page callback' => 'drupal_get_form',
       'page arguments' => array('maintain_points_post_question_form'),
       'access arguments' => array('maintain_points_post_question_customer_access'),
-          //'expanded' => TRUE,
   );
   $items['post_answer'] = array(
       'title' => 'Post your answer',
       'page callback' => 'drupal_get_form',
       'page arguments' => array('maintain_points_post_answer_form'),
-      'access arguments' => array('maintain_points_post_question_customer_access'),
-          //'expanded' => TRUE,
+      'access arguments' => array('maintain_points_post_answer_consultant_access'),
   );
   $items['category/%/%/%/edit'] = array(
       'title' => 'Edit Category',
@@ -37,6 +34,7 @@ function maintain_points_menu() {
 function maintain_points_views_api() {
   return array('api' => 3, 'path' => drupal_get_path('module', 'maintain_points') . '/view',);
 }
+
 function update_categories_points_form($form, $form_state) {
   $form['category'] = array(
       '#type' => 'textfield',
@@ -56,23 +54,29 @@ function update_categories_points_form($form, $form_state) {
   );
   return $form;
 }
+
 function maintain_points_permission() {
   return array(
       'maintain_points_form_admin_access' => array(
-          'title' => 'maintain_points_access_permission',
-          'description' => 'Admin can only view this maintain_points'
+          'title' => 'Maintain points access permission',
+          'description' => 'Admin can only add categories and points.'
       ),
       'maintain_points_post_question_customer_access' => array(
           'title' => 'Maintain points post question',
           'description' => 'Customer only can able to post question'
       ),
+      'maintain_points_post_answer_consultant_access' => array(
+          'title' => 'Maintain points post answer',
+          'description' => 'Consultant only can able to post answer'
+      ),
   );
 }
+
 function update_categories_points_form_submit($form, &$form_state) {
   $category = $form_state['values']['category'];
   $point = $form_state['values']['point'];
-  $path =  $_GET['q'];
-  $current_path= explode('/', $path);
+  $path = $_GET['q'];
+  $current_path = explode('/', $path);
   $default_category = $current_path[1];
   $default_point = $current_path[2];
   if ($category != $default_category || $point != $default_point) {
@@ -81,20 +85,20 @@ function update_categories_points_form_submit($form, &$form_state) {
             ->fields(array(
                 'category' => $form_state['values']['category'],
                 'modified_date' => $modified_time,
-                ))
-            ->condition('id', $current_path[3], '=')
-            ->execute();
-     drupal_set_message('updated'.' '.$form_state['values']['category'].' '.'successfully');
-  }
-  if($point != $default_point){
-     db_update('categories')
-            ->fields(array(
-                'modified_date' => $modified_time,
-                'points' =>$form_state['values']['point'],
             ))
             ->condition('id', $current_path[3], '=')
             ->execute();
-     drupal_set_message('updated'.' '.$form_state['values']['point'].' '.'successfully');
+    drupal_set_message('updated' . ' ' . $form_state['values']['category'] . ' ' . 'successfully');
+  }
+  if ($point != $default_point) {
+    db_update('categories')
+            ->fields(array(
+                'modified_date' => $modified_time,
+                'points' => $form_state['values']['point'],
+            ))
+            ->condition('id', $current_path[3], '=')
+            ->execute();
+    drupal_set_message('updated' . ' ' . $form_state['values']['point'] . ' ' . 'successfully');
   }
 }
 
@@ -136,51 +140,51 @@ function maintain_points_form($form, &$form_state, $no_js_use = FALSE) {
   $form['pager'] = array(
       '#theme' => 'pager',
   );
- /** $categories = get_category();
-  $points = get_points();
-  $num_of_category = count($categories);
-  if (!empty($num_of_category)) {
+  /** $categories = get_category();
+    $points = get_points();
+    $num_of_category = count($categories);
+    if (!empty($num_of_category)) {
     $form['categories_fieldset'] = array(
-        '#prefix' => '<table id="maintain_points_ajax">',
-        '#suffix' => '</table>',
-        '#tree' => TRUE,
+    '#prefix' => '<table id="maintain_points_ajax">',
+    '#suffix' => '</table>',
+    '#tree' => TRUE,
     );
     $form['categories_fieldset']['header'] = array(
-        '#markup' => '<thead>
-        <tr>
-        <th>categories</th>
-        <th>points</th>
-        </tr>
-        </thead>',
+    '#markup' => '<thead>
+    <tr>
+    <th>categories</th>
+    <th>points</th>
+    </tr>
+    </thead>',
     );
     for ($i = 0; $i < $num_of_category; $i++) {
-      $form['categories_fieldset']['row_' . $i] = array(
-          '#prefix' => '<tr>',
-          '#suffix' => '</tr>',
-      );
-      $form['categories_fieldset']['row_' . $i]['categories'] = array(
-          '#type' => 'textfield',
-          '#default_value' => $categories[$i],
-          '#size' => '15',
-          '#prefix' => '<td>',
-          '#suffix' => '</td>',
-      );
-      $form['categories_fieldset']['row_' . $i]['points'] = array(
-          '#type' => 'textfield',
-          '#size' => '5',
-          '#default_value' => $points[$i],
-          '#prefix' => '<td>',
-          '#suffix' => '</td>'
-      );
+    $form['categories_fieldset']['row_' . $i] = array(
+    '#prefix' => '<tr>',
+    '#suffix' => '</tr>',
+    );
+    $form['categories_fieldset']['row_' . $i]['categories'] = array(
+    '#type' => 'textfield',
+    '#default_value' => $categories[$i],
+    '#size' => '15',
+    '#prefix' => '<td>',
+    '#suffix' => '</td>',
+    );
+    $form['categories_fieldset']['row_' . $i]['points'] = array(
+    '#type' => 'textfield',
+    '#size' => '5',
+    '#default_value' => $points[$i],
+    '#prefix' => '<td>',
+    '#suffix' => '</td>'
+    );
     }
     $form['categories_fieldset']['submit'] = array(
-        '#prefix' => '<td>',
-        '#suffix' => '</td>',
-        '#type' => 'submit',
-        '#value' => 'update',
-        '#submit' => array('update_categories_and_points')
+    '#prefix' => '<td>',
+    '#suffix' => '</td>',
+    '#type' => 'submit',
+    '#value' => 'update',
+    '#submit' => array('update_categories_and_points')
     );
-  }**/
+    }* */
   $form['#tree'] = TRUE;
   $form['names_fieldset'] = array(
       '#type' => 'fieldset',
@@ -238,34 +242,34 @@ function maintain_points_form($form, &$form_state, $no_js_use = FALSE) {
   return $form;
 }
 
-/**function update_categories_and_points($form, &$form_state) {
+/* * function update_categories_and_points($form, &$form_state) {
   $num_of_rows = count($form_state['values']['categories_fieldset']);
   $num_of_categories = $num_of_rows - 1;
   $categories = get_category();
   $points = get_points();
   for ($i = 0; $i < $num_of_categories; $i++) {
-    if ($categories[$i] != $form_state['values']['categories_fieldset']['row_' . $i]['categories']) {
-      db_update('categories')
-              ->fields(array(
-                  'category' => $form_state['values']['categories_fieldset']['row_' . $i]['categories'],
-                      //'points' => $form_state['values']['categories_fieldset']['row_' . $i]['points']
-              ))
-              ->condition('id', $i + 1, '=')
-              ->execute();
-      drupal_set_message("updated" . ' ' . "category" . ' ' . $form_state['values']['categories_fieldset']['row_' . $i]['categories']);
-    } elseif (($points[$i] != $form_state['values']['categories_fieldset']['row_' . $i]['points'])) {
-      db_update('categories')
-              ->fields(array(
-                  //'category' => $form_state['values']['categories_fieldset']['row_' . $i]['categories'],
-                  'points' => $form_state['values']['categories_fieldset']['row_' . $i]['points']
-              ))
-              ->condition('id', $i + 1, '=')
-              ->execute();
-      drupal_set_message("updated" . ' ' . "Point" . ' ' . $form_state['values']['categories_fieldset']['row_' . $i]['points']);
-    }
+  if ($categories[$i] != $form_state['values']['categories_fieldset']['row_' . $i]['categories']) {
+  db_update('categories')
+  ->fields(array(
+  'category' => $form_state['values']['categories_fieldset']['row_' . $i]['categories'],
+  //'points' => $form_state['values']['categories_fieldset']['row_' . $i]['points']
+  ))
+  ->condition('id', $i + 1, '=')
+  ->execute();
+  drupal_set_message("updated" . ' ' . "category" . ' ' . $form_state['values']['categories_fieldset']['row_' . $i]['categories']);
+  } elseif (($points[$i] != $form_state['values']['categories_fieldset']['row_' . $i]['points'])) {
+  db_update('categories')
+  ->fields(array(
+  //'category' => $form_state['values']['categories_fieldset']['row_' . $i]['categories'],
+  'points' => $form_state['values']['categories_fieldset']['row_' . $i]['points']
+  ))
+  ->condition('id', $i + 1, '=')
+  ->execute();
+  drupal_set_message("updated" . ' ' . "Point" . ' ' . $form_state['values']['categories_fieldset']['row_' . $i]['points']);
+  }
   }
   // drupal_set_message('updated successfully');
-}**/
+  }* */
 
 function get_category() {
   $categories = db_select('categories', 'c')
@@ -392,8 +396,7 @@ function get_all_category_points() {
       $cat_points[$value->category . '-' . $value->points] = $value->category;
     }
     return $cat_points;
-  }
-  else {
+  } else {
     return array();
   }
 }
@@ -472,8 +475,8 @@ function maintain_points_post_question_form_submit($form, &$form_state) {
               ->execute();
     }
   }
-  
-  if($node->nid) {
+
+  if ($node->nid) {
     drupal_set_message('Posted Successfully');
   }
 }
@@ -489,8 +492,8 @@ function save_file($tmppath, $name) {
   }
 }
 
-function maintain_points_post_answer_form($form, &$form_state) {
-  $form['title'] = array(
+function maintain_points_post_answer_form($form, &$form_state, $nid = 0) {
+  $form['answer'] = array(
       '#type' => 'textarea',
       '#title' => t('Answer'),
       '#required' => TRUE,
@@ -507,10 +510,28 @@ function maintain_points_post_answer_form_validate($form, &$form_state) {
 }
 
 function maintain_points_post_answer_form_submit($form, &$form_state) {
-  //dpm($form_state);
+  dpm($form_state);
   $node = new stdClass();
   $node->type = 'answer';
   node_object_prepare($node);
-  $node->field_answer = $form_state['values']['title'];
-  //node_save($node);
+  $node->title = $form_state['values']['answer'];
+  //get question id.
+  $qid = $form_state['build_info']['args'][0];
+  //set the answer to the corresponding question id.
+  $node->field_answer_question[LANGUAGE_NONE][0]['nid'] = $qid;  
+  //count number of answers to the question.
+  $select = db_select('field_data_field_answer_count', 'a')
+          ->fields('a', array('field_answer_count_count'))
+          ->condition('entity_id', $qid, '=')
+          ->execute()
+          ->fetchAssoc();
+  $count = $select['field_answer_count_count'] + 1;
+  db_update('field_data_field_answer_count')
+          ->fields(array(
+              'field_answer_count_count' => $count,
+          ))
+          ->condition('entity_id', $qid, '=')
+          ->execute();
+
+  node_save($node);
 }

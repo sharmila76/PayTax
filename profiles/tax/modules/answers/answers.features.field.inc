@@ -39,35 +39,6 @@ function answers_field_default_field_bases() {
     'type' => 'text_with_summary',
   );
 
-  // Exported field_base: 'field_answer'
-  $field_bases['field_answer'] = array(
-    'active' => 1,
-    'cardinality' => 1,
-    'deleted' => 0,
-    'entity_types' => array(),
-    'field_name' => 'field_answer',
-    'foreign keys' => array(
-      'format' => array(
-        'columns' => array(
-          'format' => 'format',
-        ),
-        'table' => 'filter_format',
-      ),
-    ),
-    'indexes' => array(
-      'format' => array(
-        0 => 'format',
-      ),
-    ),
-    'locked' => 0,
-    'module' => 'text',
-    'settings' => array(
-      'profile2_private' => FALSE,
-    ),
-    'translatable' => 0,
-    'type' => 'text_long',
-  );
-
   // Exported field_base: 'field_answer_count'
   $field_bases['field_answer_count'] = array(
     'active' => 1,
@@ -278,46 +249,6 @@ function answers_field_default_field_bases() {
  */
 function answers_field_default_field_instances() {
   $field_instances = array();
-
-  // Exported field_instance: 'node-answer-field_answer'
-  $field_instances['node-answer-field_answer'] = array(
-    'bundle' => 'answer',
-    'default_value' => NULL,
-    'deleted' => 0,
-    'description' => '',
-    'display' => array(
-      'default' => array(
-        'label' => 'above',
-        'module' => 'text',
-        'settings' => array(),
-        'type' => 'text_default',
-        'weight' => 2,
-      ),
-      'teaser' => array(
-        'label' => 'above',
-        'settings' => array(),
-        'type' => 'hidden',
-        'weight' => 0,
-      ),
-    ),
-    'entity_type' => 'node',
-    'field_name' => 'field_answer',
-    'label' => 'Answer',
-    'required' => 1,
-    'settings' => array(
-      'text_processing' => 0,
-      'user_register_form' => FALSE,
-    ),
-    'widget' => array(
-      'active' => 1,
-      'module' => 'text',
-      'settings' => array(
-        'rows' => 5,
-      ),
-      'type' => 'text_textarea',
-      'weight' => 1,
-    ),
-  );
 
   // Exported field_instance: 'node-answer-field_answer_question'
   $field_instances['node-answer-field_answer_question'] = array(
@@ -598,7 +529,6 @@ function answers_field_default_field_instances() {
 
   // Translatables
   // Included for use with string extractors like potx.
-  t('Answer');
   t('Answer Count');
   t('Answer to the question');
   t('Category for the question');

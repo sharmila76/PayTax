@@ -311,7 +311,7 @@ function check_questions_viewed_or_not() {
     $question_node = node_load($question_nid);
     $date = format_date($question_node->created, 'custom', 'd-M-o');
     $q_created_user = $question_node->uid;
-    $answer_count = $question_node->field_answer_count['und'][0]['count'];
+    $answer_count = $question_node->field_answer_count[LANGUAGE_NONE][0]['count'];
     if (!empty($answer_count) && ($q_created_user == $user->uid )) {
       $answers = db_select('node', 'n')
               ->fields('n', array('nid', 'title', 'type'))
@@ -320,7 +320,7 @@ function check_questions_viewed_or_not() {
       foreach ($answers as $answer) {
         $answer_nid = $answer->nid;
         $answer_node = node_load($answer_nid);
-        $qid = $answer_node->field_answer_question['und'][0]['nid'];
+        $qid = $answer_node->field_answer_question[LANGUAGE_NONE][0]['nid'];
         if ($qid == $question_nid) {
           $viewed_answer = db_select('node_view_count', 'n')
                   ->fields('n', array('uid', 'nid'))
